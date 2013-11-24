@@ -3,7 +3,13 @@ package robomap.database;
 import robomap.model.Home;
 
 public interface HomeDAO {
+	
+	public void saveHome(Home home);
+	
+	public void updateHome(Home home);
+	
+	public void deleteHome(Home home);
 
-	Home findHome(String homeName);
+	public Home findHome(String homeName);
 
 }

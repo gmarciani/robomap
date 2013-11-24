@@ -5,25 +5,23 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import robomap.database.ConnectionManager;
-import robomap.database.ObjectDAO;
+import robomap.database.WallDAO;
 import robomap.log.Log;
-import robomap.model.Object;
+import robomap.model.Wall;
 
-public class ObjectJDBCDAO implements ObjectDAO {
+public class WallJDBCDAO implements WallDAO {
 	
-	private static ConnectionManager connectionManager = null;
-	private static ObjectJDBCDAO objectDAO = null;
+	private static ConnectionManager connectionManager;
+	private static WallDAO wallDAO;
 	
-	private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS object ("
+	private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS room ("
 			+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT,"
 			+ "name VARCHAR(20) NOT NULL,"
-			+ "x INT UNSIGNED NOT NULL,"
-			+ "y INT UNSIGNED NOT NULL,"
 			+ "width INT UNSIGNED NOT NULL,"
 			+ "height INT UNSIGNED NOT NULL,"
-			+ "room INT UNSIGNED NOT NULL,"
-			+ "CONSTRAINT pkObject PRIMARY KEY (id),"
-			+ "CONSTRAINT fkRoom FOREIGN KEY (room) REFERENCES room(id) ON DELETE CASCADE)";
+			+ "home INT UNSIGNED NOT NULL,"
+			+ "CONSTRAINT pkRoom PRIMARY KEY (id),"
+			+ "CONSTRAINT fkHome FOREIGN KEY (home) REFERENCES home(id) ON DELETE CASCADE)";
 	
 	private static final String SQL_INSERT = "";
 	
@@ -31,15 +29,15 @@ public class ObjectJDBCDAO implements ObjectDAO {
 	
 	private static final String SQL_DELETE = "";
 	
-	private ObjectJDBCDAO() {
+	private WallJDBCDAO() {
 		this.createTable();
-	}	
+	}
 	
-	public static ObjectJDBCDAO getInstance() {
-		if(objectDAO == null) {
-			objectDAO = new ObjectJDBCDAO();
+	public static WallDAO getInstance() {
+		if (wallDAO == null) {
+			wallDAO = new WallJDBCDAO();
 		}
-		return objectDAO;
+		return wallDAO;
 	}
 	
 	private void createTable() {
@@ -52,28 +50,28 @@ public class ObjectJDBCDAO implements ObjectDAO {
 			statement = connection.prepareStatement(SQL_CREATE_TABLE);
 			statement.executeUpdate();
 		} catch (SQLException exc) {
-			Log.printSQLException("ObjectJDBCDAO", "createTable", exc);
+			Log.printSQLException("RoomJDBCDAO", "createTable", exc);
 		} finally {
 			connectionManager.close(connection, statement);
 		}	
 	}
-
+	
 	@Override
-	public void saveObject(Object object) {
+	public void saveWall(String homeName, Wall wall) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void updateObject(Object object) {
+	public void updateWall(String homeName, Wall wall) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	public void deleteObject(Object object) {
+	public void deleteWall(String homeName, Wall wall) {
 		// TODO Auto-generated method stub
-		
-	}
+
+	}	
 
 }

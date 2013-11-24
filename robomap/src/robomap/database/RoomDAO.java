@@ -1,10 +1,13 @@
 package robomap.database;
 
-import robomap.model.Location;
 import robomap.model.Room;
 
 public interface RoomDAO {
-
-	Location findLocation(Room room);
+	
+	public void saveRoom(String homeName, Room room);
+	
+	public void updateRoom(String homeName, Room room);
+	
+	public void deleteRoom(String homeName, Room room);
 
 }
