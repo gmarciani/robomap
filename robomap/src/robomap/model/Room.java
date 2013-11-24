@@ -1,19 +1,32 @@
 package robomap.model;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
+import robomap.model.Object;
 
 public class Room {
 	
-	private String name;
-	private Location location;
+	private String name; 
 	private Dimension dimension;
-	private Set<Object> objects;
+	private Location location;	
+	private List<Object> objects = new ArrayList<Object>();
 	
-	public Room(String name, Location location, Dimension dimension, Set<Object> objects) {
+	public Room(String name, Dimension dimension, Location location, List<Object> objects) {
 		this.setName(name); 
-		this.setLocation(location);
 		this.setDimension(dimension);
+		this.setLocation(location);		
 		this.setObjects(objects);
+	}
+	
+	public Room(String name, Dimension dimension, Location location) {
+		this.setName(name); 		
+		this.setDimension(dimension);
+		this.setLocation(location);
+	}
+	
+	public Room() {
+		
 	}
 
 	public String getName() {
@@ -40,12 +53,25 @@ public class Room {
 		this.dimension = dimension;
 	}
 
-	public Set<Object> getObjects() {
+	public List<Object> getObjects() {
 		return this.objects;
 	}
 
-	public void setObjects(Set<Object> objects) {
+	public void setObjects(List<Object> objects) {
 		this.objects = objects;
 	}	
+	
+	public void addObject(Object object) {
+		this.objects.add(object);
+	}
+	
+	@Override
+	public String toString() {
+		return "Room(" + 
+				this.getName() + ";" + 
+				this.getDimension().toString() + ";" + 
+				this.getLocation().toString() + ";" + 
+				this.getObjects().toString() + ")";
+	}
 
 }

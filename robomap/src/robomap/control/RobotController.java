@@ -1,5 +1,11 @@
 package robomap.control;
 
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import robomap.database.HomeDAO;
 import robomap.database.ObjectDAO;
 import robomap.database.RoomDAO;
@@ -8,6 +14,7 @@ import robomap.database.impl.HomeJDBCDAO;
 import robomap.database.impl.ObjectJDBCDAO;
 import robomap.database.impl.SettingJDBCDAO;
 import robomap.database.impl.RoomJDBCDAO;
+import robomap.log.Log;
 import robomap.model.Direction;
 import robomap.model.Home;
 import robomap.model.Location;
@@ -20,8 +27,9 @@ import robomap.model.graph.Path;
 
 public class RobotController {
 	
-	private static RobotController robotController = null;
-	private static GraphController graphController = null;
+	private static RobotController robotController;
+	private static XMLController xmlController;
+	private static GraphController graphController;
 	
 	private static HomeDAO homeDAO = null;
 	private static RoomDAO roomDAO = null;
@@ -29,6 +37,7 @@ public class RobotController {
 	private static SettingDAO settingDAO = null;
 		
 	private RobotController() {
+		xmlController = XMLController.getInstance();
 		graphController = GraphController.getInstance();
 		homeDAO = HomeJDBCDAO.getInstance();
 		roomDAO = RoomJDBCDAO.getInstance();
@@ -43,9 +52,17 @@ public class RobotController {
 		return robotController;
 	}
 	
+	public void importHomeFromXML(String path) {
+		try {
+			xmlController.parsePlanimetry(path);
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			Log.printXMLException("RobotController", "ImportHomeFromXML", e);
+		}
+	}
+	
 	public void loadHome(String homeName) {
 		Home home = homeDAO.findHome(homeName);
-		graphController.parseGraph(home);
+		graphController.parseDatasource(home);
 		
 	}
 

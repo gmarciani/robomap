@@ -14,6 +14,10 @@ public class Robot {
 		controller = RobotController.getInstance();
 	}
 	
+	public void importHomeFromXML(String path) {
+		controller.importHomeFromXML(path);
+	}
+	
 	public String getHome() {
 		return this.home;
 	}
@@ -29,19 +33,7 @@ public class Robot {
 
 	public void setLocation(Location location) {
 		this.location = location;
-	}
-	
-	public void goToStart() {
-		Location location = controller.getStartLocation();
-		PathPlan pathPlan = controller.getPathPlan(this.getLocation(), location);
-		this.move(pathPlan);
-	}
-	
-	private void move(PathPlan pathPlan) {
-		for(Movement movement : pathPlan.getMovements()) {
-			this.move(movement);
-		}		
-	}
+	}	
 	
 	private void move(Movement movement) {
 		int currX = this.getLocation().getX();
@@ -51,6 +43,18 @@ public class Robot {
 		Location newLocation = new Location(currX + moveX, currY + moveY);
 		this.setLocation(newLocation);
 		Log.printMovement(movement);
+	}
+	
+	private void move(PathPlan pathPlan) {
+		for(Movement movement : pathPlan.getMovements()) {
+			this.move(movement);
+		}		
+	}
+	
+	public void goToStart() {
+		Location location = controller.getStartLocation();
+		PathPlan pathPlan = controller.getPathPlan(this.getLocation(), location);
+		this.move(pathPlan);
 	}
 
 	public void goTo(Room room) {

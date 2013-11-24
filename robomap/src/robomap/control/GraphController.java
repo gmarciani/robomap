@@ -20,7 +20,7 @@ public class GraphController {
 		return graphController;
 	}
 
-	public Graph parseGraph(Home home) {
+	public Graph parseDatasource(Home home) {
 		// TODO Auto-generated method stub
 		return null;
 	}

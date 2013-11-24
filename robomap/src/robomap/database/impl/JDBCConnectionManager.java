@@ -16,14 +16,33 @@ private static JDBCConnectionManager singletonConnectionManager = null;
 	private static final String URL = "jdbc:mysql://localhost:3306/robomap";
 	private static final String USER = "root";
 	private static final String PASSWORD = "password";
+	
+	private static final String SQL_CREATE_DATABASE = "CREATE SCHEMA IF NOT EXISTS robomap";
 
-	protected JDBCConnectionManager() {}
+	private JDBCConnectionManager() {
+		this.createDatabase();
+	}
 	
 	public static synchronized JDBCConnectionManager getInstance() {
 		if (singletonConnectionManager == null) {
 			singletonConnectionManager = new JDBCConnectionManager();
 		}		
 		return singletonConnectionManager;
+	}
+	
+	private void createDatabase() {	
+		
+		Connection connection = this.getConnection();
+		PreparedStatement statement = null;
+		
+		try {
+			statement = connection.prepareStatement(SQL_CREATE_DATABASE);
+			statement.executeUpdate();
+		} catch (SQLException exc) {
+			Log.printSQLException("JDBCConnectionManager", "createDatabase", exc);
+		} finally {
+			this.close(statement);
+		}
 	}
 	
 	@Override
@@ -42,33 +61,44 @@ private static JDBCConnectionManager singletonConnectionManager = null;
 			try {
 				connection.close();
 			} catch (SQLException exc) {
-				Log.printSQLException("JBDCConnectionManager", "close", exc);
+				Log.printSQLException("JBDCConnectionManager", "close(connection)", exc);
+			}
+		}
+	}
+	
+	@Override
+	public synchronized void close(PreparedStatement statement) {
+		if (statement != null) {
+			try {
+				statement.close();
+			} catch (SQLException exc) {
+				Log.printSQLException("JBDCConnectionManager", "close(statement)", exc);
+			}
+		}
+	}
+	
+	@Override
+	public synchronized void close(ResultSet result) {
+		if (result != null) {
+			try {
+				result.close();
+			} catch (SQLException exc) {
+				Log.printSQLException("JBDCConnectionManager", "close(resultset)", exc);
 			}
 		}
 	}
 	
 	@Override
 	public synchronized void close(Connection connection, PreparedStatement statement) {
-		if (statement != null) {
-			try {
-				statement.close();
-			} catch (SQLException exc) {
-				Log.printSQLException("JBDCConnectionManager", "close", exc);
-			}
-		}		
-		close(connection);
+		this.close(statement);	
+		this.close(connection);
 	}
 	
 	@Override
 	public synchronized void close(Connection connection, PreparedStatement statement, ResultSet result) {
-		if (result != null) {
-			try {
-				result.close();
-			} catch (SQLException exc) {
-				Log.printSQLException("JBDCConnectionManager", "close", exc);
-			}
-		}		
-		close(connection, statement);
+		this.close(result);	
+		this.close(statement);	
+		this.close(connection);
 	}
 
 }

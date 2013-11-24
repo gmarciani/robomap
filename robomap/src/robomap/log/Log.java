@@ -12,6 +12,11 @@ public class Log {
 		System.out.println(className + " : " + methodName + " : " + errCode + " : " + errMessage);
 	}
 	
+	public static final void printXMLException(String className, String methodName, Exception exc) {
+		String errMessage = exc.getMessage();
+		System.out.println(className + " : " + methodName + " : " + errMessage);
+	}
+	
 	public static final void printMovement(Movement movement) {
 		System.out.println("#Movement: " + movement.toString());
 	}

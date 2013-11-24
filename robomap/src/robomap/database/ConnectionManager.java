@@ -10,8 +10,12 @@ public interface ConnectionManager {
 	
 	public void close(Connection connection);
 	
+	void close(PreparedStatement statement);
+
+	void close(ResultSet result);
+	
 	public void close(Connection connection, PreparedStatement statement);
 	
-	public void close(Connection connection, PreparedStatement statement, ResultSet resultSet);
+	public void close(Connection connection, PreparedStatement statement, ResultSet resultSet);	
 
 }

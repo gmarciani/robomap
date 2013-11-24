@@ -25,5 +25,12 @@ public class Dimension {
 	public void setHeight(int height) {
 		this.height = height;
 	}
+	
+	@Override
+	public String toString() {
+		return "Dimension(" + 
+				this.getWidth() + ";" + 
+				this.getHeight() + ")";
+	}
 
 }
