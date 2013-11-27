@@ -1,19 +1,16 @@
-package robomap.model;
+package robomap.model.home;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
-public class Door {
+import robomap.model.base.Dimension;
+import robomap.model.base.Location;
+
+public class Door implements Serializable {
+	
+	private static final long serialVersionUID = -3076339254360310436L;
 	
 	private Dimension dimension;
 	private Location location;	
-	private List<Room> rooms = new ArrayList<Room>();
-	
-	public Door(Dimension dimension, Location location, List<Room> rooms) {
-		this.setDimension(dimension);
-		this.setLocation(location);
-		this.setRooms(rooms);
-	}
 	
 	public Door(Dimension dimension, Location location) {
 		this.setLocation(location);
@@ -34,18 +31,6 @@ public class Door {
 
 	public void setLocation(Location location) {
 		this.location = location;
-	}
-
-	public List<Room> getRooms() {
-		return this.rooms;
-	}
-
-	public void setRooms(List<Room> rooms) {
-		this.rooms = rooms;
-	}	
-	
-	public void addRoom(Room room) {
-		this.rooms.add(room);
 	}
 	
 	@Override

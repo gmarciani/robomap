@@ -4,25 +4,26 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import robomap.database.ActionDAO;
 import robomap.database.ConnectionManager;
-import robomap.database.RoomDAO;
 import robomap.log.Log;
-import robomap.model.base.Location;
-import robomap.model.home.Room;
+import robomap.model.object.Action;
 
-public class RoomJDBCDAO implements RoomDAO {
+public class ActionJDBCDAO implements ActionDAO {
 	
 	private static ConnectionManager connectionManager;
-	private static RoomDAO roomDAO;
+	private static ActionJDBCDAO actionDAO;
 	
-	private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS room ("
+	private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS object ("
 			+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT,"
 			+ "name VARCHAR(20) NOT NULL,"
+			+ "x INT UNSIGNED NOT NULL,"
+			+ "y INT UNSIGNED NOT NULL,"
 			+ "width INT UNSIGNED NOT NULL,"
 			+ "height INT UNSIGNED NOT NULL,"
-			+ "home INT UNSIGNED NOT NULL,"
-			+ "CONSTRAINT pkRoom PRIMARY KEY (id),"
-			+ "CONSTRAINT fkHome FOREIGN KEY (home) REFERENCES home(id) ON DELETE CASCADE)";
+			+ "room INT UNSIGNED NOT NULL,"
+			+ "CONSTRAINT pkObject PRIMARY KEY (id),"
+			+ "CONSTRAINT fkRoom FOREIGN KEY (room) REFERENCES room(id) ON DELETE CASCADE)";
 	
 	private static final String SQL_INSERT = "";
 	
@@ -30,15 +31,15 @@ public class RoomJDBCDAO implements RoomDAO {
 	
 	private static final String SQL_DELETE = "";
 	
-	private RoomJDBCDAO() {
+	private ActionJDBCDAO() {
 		this.createTable();
 	}	
-
-	public static RoomDAO getInstance() {
-		if(roomDAO == null) {
-			roomDAO = new RoomJDBCDAO();
+	
+	public static ActionJDBCDAO getInstance() {
+		if(actionDAO == null) {
+			actionDAO = new ActionJDBCDAO();
 		}
-		return roomDAO;
+		return actionDAO;
 	}
 	
 	private void createTable() {
@@ -51,32 +52,32 @@ public class RoomJDBCDAO implements RoomDAO {
 			statement = connection.prepareStatement(SQL_CREATE_TABLE);
 			statement.executeUpdate();
 		} catch (SQLException exc) {
-			Log.printSQLException("RoomJDBCDAO", "createTable", exc);
+			Log.printSQLException("ObjectJDBCDAO", "createTable", exc);
 		} finally {
 			connectionManager.close(connection, statement);
 		}	
 	}
 
 	@Override
-	public void saveRoom(String homeName, Room room) {
+	public void saveAction(Action action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void updateRoom(String homeName, Room room) {
+	public void updateAction(Action action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void deleteRoom(String homeName, Room room) {
+	public void deleteAction(Action action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public Location getLocation(Room room) {
+	public Action getAction(String actionName) {
 		// TODO Auto-generated method stub
 		return null;
 	}

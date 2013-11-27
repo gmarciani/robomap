@@ -3,11 +3,15 @@ package robomap.database.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
 import robomap.database.ConnectionManager;
 import robomap.database.ObjectDAO;
 import robomap.log.Log;
-import robomap.model.Object;
+import robomap.model.base.Direction;
+import robomap.model.base.Location;
+import robomap.model.object.Action;
+import robomap.model.object.Object;
 
 public class ObjectJDBCDAO implements ObjectDAO {
 	
@@ -74,6 +78,48 @@ public class ObjectJDBCDAO implements ObjectDAO {
 	public void deleteObject(Object object) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public List<String> getActions(Object object) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void changeStatus(Object object, String newStatus) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public java.lang.Object getLocationForAction(Object object, String action) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean checkActionAvailability(Object object, Action action) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Location getLocation(Object object) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Location getLocation(Object object, String actionName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Location getLocation(Object object, Direction direction) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

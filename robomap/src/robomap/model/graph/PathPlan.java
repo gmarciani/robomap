@@ -1,9 +1,15 @@
-package robomap.model;
+package robomap.model.graph;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PathPlan {
+import robomap.model.base.Direction;
+import robomap.model.robot.Movement;
+
+public class PathPlan implements Serializable {
+	
+	private static final long serialVersionUID = -3311063790419252246L;
 	
 	List<Movement> movements;
 	
@@ -30,7 +36,7 @@ public class PathPlan {
 	
 	@Override
 	public String toString() {
-		return this.getMovements().toString();
+		return "PathPlan(" + this.getMovements().toString() + ")";
 	}
 	
 	

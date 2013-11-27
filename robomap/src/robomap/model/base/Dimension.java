@@ -1,6 +1,10 @@
-package robomap.model;
+package robomap.model.base;
 
-public class Dimension {
+import java.io.Serializable;
+
+public class Dimension implements Serializable {
+	
+	private static final long serialVersionUID = -367509300511668919L;
 	
 	private int width;
 	private int height;

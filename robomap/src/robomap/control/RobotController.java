@@ -1,48 +1,59 @@
 package robomap.control;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
+import robomap.database.ActionDAO;
 import robomap.database.HomeDAO;
 import robomap.database.ObjectDAO;
 import robomap.database.RoomDAO;
-import robomap.database.SettingDAO;
+import robomap.database.impl.ActionJDBCDAO;
 import robomap.database.impl.HomeJDBCDAO;
 import robomap.database.impl.ObjectJDBCDAO;
-import robomap.database.impl.SettingJDBCDAO;
 import robomap.database.impl.RoomJDBCDAO;
 import robomap.log.Log;
-import robomap.model.Direction;
-import robomap.model.Home;
-import robomap.model.Location;
-import robomap.model.Movement;
-import robomap.model.Object;
-import robomap.model.PathPlan;
-import robomap.model.Room;
+import robomap.model.base.Direction;
+import robomap.model.base.Location;
 import robomap.model.graph.Arc;
+import robomap.model.graph.Node;
 import robomap.model.graph.Path;
+import robomap.model.graph.PathPlan;
+import robomap.model.home.Home;
+import robomap.model.home.Room;
+import robomap.model.object.Action;
+import robomap.model.object.Object;
+import robomap.model.robot.Movement;
 
 public class RobotController {
 	
 	private static RobotController robotController;
+	private static DisplayController displayController;
 	private static XMLController xmlController;
 	private static GraphController graphController;
 	
-	private static HomeDAO homeDAO = null;
-	private static RoomDAO roomDAO = null;
-	private static ObjectDAO objectDAO = null;
-	private static SettingDAO settingDAO = null;
+	private static HomeDAO homeDAO;
+	private static RoomDAO roomDAO;
+	private static ObjectDAO objectDAO;
+	private static ActionDAO actionDAO;
+	
+	private Home currentHome;
+	private Location currentLocation;
+	private DirectedGraph<Node, Arc> graph;
 		
 	private RobotController() {
+		displayController = DisplayController.getInstance();
 		xmlController = XMLController.getInstance();
 		graphController = GraphController.getInstance();
 		homeDAO = HomeJDBCDAO.getInstance();
 		roomDAO = RoomJDBCDAO.getInstance();
 		objectDAO = ObjectJDBCDAO.getInstance();
-		settingDAO = SettingJDBCDAO.getInstance();
+		actionDAO = ActionJDBCDAO.getInstance();
 	}
 	
 	public static RobotController getInstance() {
@@ -52,27 +63,75 @@ public class RobotController {
 		return robotController;
 	}
 	
-	public void importHomeFromXML(String path) {
+	public void move(Movement movement) {
+		int currX = this.getCurrentLocation().getX();
+		int currY = this.getCurrentLocation().getY();
+		int moveX = (movement.getDirection() == Direction.RIGHT) ? 1 : -1;
+		int moveY = (movement.getDirection() == Direction.FORWARD) ? 1 : -1;
+		Location newLocation = new Location(currX + moveX, currY + moveY);
+		this.setCurrentLocation(newLocation);
+		Log.printMovement(movement);
+	}
+	
+	public List<Home> importHomeFromXML(String path) {
+		List<Home> listHomes = new ArrayList<Home>();
 		try {
-			xmlController.parsePlanimetry(path);
+			listHomes = xmlController.parsePlanimetry(path);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			Log.printXMLException("RobotController", "ImportHomeFromXML", e);
 		}
+		/*
+		for (Home home : listHomes) {
+			homeDAO.saveHome(home);
+		}*/
+		displayController.showImportedHomes(listHomes);
+		return listHomes;
 	}
 	
-	public void loadHome(String homeName) {
-		Home home = homeDAO.findHome(homeName);
-		graphController.parseDatasource(home);
-		
+	public Home selectHome() {
+		List<Home> allHomes = homeDAO.getAll();
+		int choice = displayController.selectHome(allHomes);
+		Home selectedHome = allHomes.get(choice);
+		this.setCurrentHome(selectedHome);
+		return selectedHome;
+	}
+	
+	public Home getCurrentHome() {
+		return this.currentHome;
+	}
+
+	public void setCurrentHome(Home home) {
+		this.currentHome = home;
+		this.setGraph(graphController.parseGraph(home));
+		Location startLocation = this.getStartLocation();
+		this.setCurrentLocation(startLocation);
+	}
+	
+	public Location getCurrentLocation() {
+		return this.currentLocation;
+	}
+
+	public void setCurrentLocation(Location currentLocation) {
+		this.currentLocation = currentLocation;
+	}	
+	
+	public DirectedGraph<Node, Arc> getGraph() {
+		return this.graph;
+	}
+
+	public void setGraph(DirectedGraph<Node, Arc> graph) {
+		this.graph = graph;
 	}
 
 	public Location getStartLocation() {
-		Location startLocation = settingDAO.getStartLocation();
+		Home home = this.getCurrentHome();
+		Location startLocation = homeDAO.getStartLocation(home);
 		return startLocation;
 	}
 
-	public PathPlan getPathPlan(Location source, Location destination) {
-		Path path = graphController.computePath(source, destination);
+	public PathPlan getPathPlanTo(Location destination) {
+		Location source = this.getCurrentLocation();
+		Path path = graphController.computePath(this.getGraph(), source, destination);
 		PathPlan pathPlan = new PathPlan();
 		for (Arc arc : path.getArcs()) {
 			Movement movement = this.getMovementFromArc(arc);
@@ -84,50 +143,78 @@ public class RobotController {
 	private Movement getMovementFromArc(Arc arc) {
 		Location source = arc.getSource().getLocation();
 		Location destination = arc.getDestination().getLocation();
-		int weight = arc.getWeight();
+		float module = arc.getWeight();
+		Direction direction;
 		int sourceX = source.getX();
 		int sourceY = source.getY();
 		int destinationX = destination.getX();
 		int destinationY = destination.getY();
-		Movement movement = new Movement();
-		movement.setModule(weight);
 		if(destinationX > sourceX) {
 			if(destinationY > sourceY) {
-				movement.setDirection(Direction.DIAGONAL_TOP_RIGHT);
+				direction = Direction.DIAGONAL_TOP_RIGHT;
 			} else if(destinationY < sourceY) {
-				movement.setDirection(Direction.DIAGONAL_BOTTOM_RIGHT);
+				direction = Direction.DIAGONAL_BOTTOM_RIGHT;
 			} else {
-				movement.setDirection(Direction.RIGHT);
+				direction = Direction.RIGHT;
 			}
 			
 		} else if(destinationX < sourceX){
 			if(destinationY > sourceY) {
-				movement.setDirection(Direction.DIAGONAL_TOP_LEFT);
+				direction = Direction.DIAGONAL_TOP_LEFT;
 			} else if(destinationY < sourceY) {
-				movement.setDirection(Direction.DIAGONAL_BOTTOM_LEFT);
+				direction = Direction.DIAGONAL_BOTTOM_LEFT;
 			} else {
-				movement.setDirection(Direction.LEFT);
+				direction = Direction.LEFT;
 			}
 		} else {
 			if(destinationY > sourceY) {
-				movement.setDirection(Direction.FORWARD);
+				direction = Direction.FORWARD;
 			} else if(destinationY < sourceY) {
-				movement.setDirection(Direction.BACK);
+				direction = Direction.BACK;
 			} else {
-				movement.setDirection(Direction.NONE);
+				direction = Direction.NONE;
 			}
 		}
-		return movement;
+		return new Movement(direction, module);
 	}
 
 	public Location getLocation(Room room) {
-		Location roomLocation = roomDAO.findLocation(room);
-		return roomLocation;
+		return roomDAO.getLocation(room);
 	}
 
 	public Location getLocation(Object object) {
-		Location objectLocation = objectDAO.findLocation(object);
-		return objectLocation;
+		return objectDAO.getLocation(object);
+	}
+	
+	public Location getLocation(Object object, String actionName) {
+		return objectDAO.getLocation(object, actionName);
+	}
+
+	public Location getLocation(Object object, Direction direction) {
+		return objectDAO.getLocation(object,  direction);
+	}
+
+	public List<String> getAvailableActions(Object object) {
+		return objectDAO.getActions(object);
+	}
+	
+	public void doAction(Object object, String actionName) {
+		if (this.checkActionAvailability(object, actionName) && 
+				this.getCurrentLocation().equals(objectDAO.getLocationForAction(object, actionName))) {
+			Action action = actionDAO.getAction(actionName);
+			objectDAO.changeStatus(object, action.getStatus());
+			Log.printAction(object, action);
+		}		
+	}
+	
+	private boolean checkActionAvailability(Object object, String actionName) {
+		Action action = actionDAO.getAction(actionName);
+		return objectDAO.checkActionAvailability(object, action);
+	}	
+	
+	public int getUserChoice(List<String> choices) {
+		int choice = displayController.choose(choices);
+		return choice;
 	}
 
 }

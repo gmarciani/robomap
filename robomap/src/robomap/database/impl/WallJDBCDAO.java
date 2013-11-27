@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import robomap.database.ConnectionManager;
 import robomap.database.WallDAO;
 import robomap.log.Log;
-import robomap.model.Wall;
+import robomap.model.home.Wall;
 
 public class WallJDBCDAO implements WallDAO {
 	

@@ -2,7 +2,9 @@ package robomap.log;
 
 import java.sql.SQLException;
 
-import robomap.model.Movement;
+import robomap.model.object.Action;
+import robomap.model.object.Object;
+import robomap.model.robot.Movement;
 
 public class Log {
 	
@@ -19,6 +21,10 @@ public class Log {
 	
 	public static final void printMovement(Movement movement) {
 		System.out.println("#Movement: " + movement.toString());
+	}
+
+	public static void printAction(Object object, Action action) {
+		System.out.println("ACTION " + action.getName() + " ON OBJECT " + object.getName() + " --> " + action.getStatus());
 	}
 
 }

@@ -8,17 +8,19 @@ import java.util.List;
 import robomap.database.ConnectionManager;
 import robomap.database.DoorDAO;
 import robomap.database.HomeDAO;
-import robomap.database.ObjectDAO;
 import robomap.database.RoomDAO;
 import robomap.database.WallDAO;
 import robomap.log.Log;
-import robomap.model.Dimension;
-import robomap.model.Door;
-import robomap.model.Home;
-import robomap.model.Room;
-import robomap.model.Wall;
+import robomap.model.base.Dimension;
+import robomap.model.base.Location;
+import robomap.model.home.Door;
+import robomap.model.home.Home;
+import robomap.model.home.Room;
+import robomap.model.home.Wall;
 
 public class HomeJDBCDAO implements HomeDAO {
+	
+	private static final Location START_LOCATION = new Location(0,0);
 	
 	private static ConnectionManager connectionManager;
 	private static HomeDAO homeDAO;
@@ -102,6 +104,17 @@ public class HomeJDBCDAO implements HomeDAO {
 	
 	@Override
 	public Home findHome(String homeName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Location getStartLocation(Home home) {
+		return START_LOCATION;
+	}
+
+	@Override
+	public List<Home> getAll() {
 		// TODO Auto-generated method stub
 		return null;
 	}

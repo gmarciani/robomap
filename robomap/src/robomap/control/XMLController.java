@@ -14,13 +14,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import robomap.model.Dimension;
-import robomap.model.Door;
-import robomap.model.Home;
-import robomap.model.Location;
-import robomap.model.Room;
-import robomap.model.Object;
-import robomap.model.Wall;
+import robomap.model.base.Dimension;
+import robomap.model.base.Location;
+import robomap.model.home.Door;
+import robomap.model.home.Home;
+import robomap.model.home.Room;
+import robomap.model.home.Wall;
+import robomap.model.object.Object;
 
 public class XMLController {
 	
@@ -38,7 +38,7 @@ public class XMLController {
 		return xmlController;
 	}
 	
-	public void parsePlanimetry(String path) throws ParserConfigurationException, SAXException, IOException {
+	public List<Home> parsePlanimetry(String path) throws ParserConfigurationException, SAXException, IOException {
 		File file = new File(path);
 		
 		List<Home> listHomes = new ArrayList<Home>();
@@ -64,8 +64,8 @@ public class XMLController {
 				String roomName = elementRoom.getAttribute("name");
 				int roomWidth = Integer.valueOf(elementRoom.getAttribute("width"));
 				int roomHeight = Integer.valueOf(elementRoom.getAttribute("height"));
-				int roomLocationX = Integer.valueOf(elementRoom.getAttribute("width"));
-				int roomLocationY = Integer.valueOf(elementRoom.getAttribute("height"));
+				int roomLocationX = Integer.valueOf(elementRoom.getAttribute("x"));
+				int roomLocationY = Integer.valueOf(elementRoom.getAttribute("y"));
 				Room room = new Room(roomName, new Dimension(roomWidth, roomHeight), new Location(roomLocationX, roomLocationY));
 				
 				NodeList nodesObject = elementRoom.getElementsByTagName("OBJECT");
@@ -75,8 +75,8 @@ public class XMLController {
 					String objectName = elementObject.getAttribute("name");
 					int objectWidth = Integer.valueOf(elementObject.getAttribute("width"));
 					int objectHeight = Integer.valueOf(elementObject.getAttribute("height"));
-					int objectLocationX = Integer.valueOf(elementObject.getAttribute("width"));
-					int objectLocationY = Integer.valueOf(elementObject.getAttribute("height"));
+					int objectLocationX = Integer.valueOf(elementObject.getAttribute("x"));
+					int objectLocationY = Integer.valueOf(elementObject.getAttribute("y"));
 					Object object = new Object(objectName, new Dimension(objectWidth, objectHeight), new Location(objectLocationX, objectLocationY));
 					room.addObject(object);					
 				}
@@ -88,8 +88,8 @@ public class XMLController {
 				Element elementWall = (Element) nodesWall.item(w);
 				int wallWidth = Integer.valueOf(elementWall.getAttribute("width"));
 				int wallHeight = Integer.valueOf(elementWall.getAttribute("height"));
-				int wallLocationX = Integer.valueOf(elementWall.getAttribute("width"));
-				int wallLocationY = Integer.valueOf(elementWall.getAttribute("height"));
+				int wallLocationX = Integer.valueOf(elementWall.getAttribute("x"));
+				int wallLocationY = Integer.valueOf(elementWall.getAttribute("y"));
 				Wall wall = new Wall(new Dimension(wallWidth, wallHeight), new Location(wallLocationX, wallLocationY));
 				home.addWall(wall);				
 			}
@@ -98,8 +98,8 @@ public class XMLController {
 				Element elementDoor = (Element) nodesDoor.item(d);
 				int doorWidth = Integer.valueOf(elementDoor.getAttribute("width"));
 				int doorHeight = Integer.valueOf(elementDoor.getAttribute("height"));
-				int doorLocationX = Integer.valueOf(elementDoor.getAttribute("width"));
-				int doorLocationY = Integer.valueOf(elementDoor.getAttribute("height"));
+				int doorLocationX = Integer.valueOf(elementDoor.getAttribute("x"));
+				int doorLocationY = Integer.valueOf(elementDoor.getAttribute("y"));
 				Door door = new Door(new Dimension(doorWidth, doorHeight), new Location(doorLocationX, doorLocationY));
 				home.addDoor(door);				
 			}
@@ -108,9 +108,7 @@ public class XMLController {
 			listHomes.add(home);
 		}
 		
-		for (Home home : listHomes) {
-			System.out.println("#HOME: " + home.toString());
-		}
+		return listHomes;
 		
 	}
 

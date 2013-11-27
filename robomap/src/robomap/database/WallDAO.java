@@ -1,6 +1,6 @@
 package robomap.database;
 
-import robomap.model.Wall;
+import robomap.model.home.Wall;
 
 public interface WallDAO {
 	

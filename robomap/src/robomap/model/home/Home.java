@@ -1,9 +1,14 @@
-package robomap.model;
+package robomap.model.home;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Home {
+import robomap.model.base.Dimension;
+
+public class Home implements Serializable {
+	
+	private static final long serialVersionUID = -2389178962534385100L;
 	
 	private String name;
 	private Dimension dimension;

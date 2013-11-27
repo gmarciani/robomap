@@ -1,6 +1,7 @@
 package robomap.database;
 
-import robomap.model.Room;
+import robomap.model.base.Location;
+import robomap.model.home.Room;
 
 public interface RoomDAO {
 	
@@ -9,5 +10,7 @@ public interface RoomDAO {
 	public void updateRoom(String homeName, Room room);
 	
 	public void deleteRoom(String homeName, Room room);
+
+	public Location getLocation(Room room);
 
 }

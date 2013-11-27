@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import robomap.database.ConnectionManager;
 import robomap.database.DoorDAO;
 import robomap.log.Log;
-import robomap.model.Door;
+import robomap.model.home.Door;
 
 public class DoorJDBCDAO implements DoorDAO {
 	

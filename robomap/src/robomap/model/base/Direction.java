@@ -1,6 +1,8 @@
-package robomap.model;
+package robomap.model.base;
 
-public enum Direction {
+import java.io.Serializable;
+
+public enum Direction implements Serializable {
 	
 	FORWARD("Forward"),
 	BACK("Back"),

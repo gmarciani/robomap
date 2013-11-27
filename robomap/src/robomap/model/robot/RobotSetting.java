@@ -1,6 +1,12 @@
-package robomap.model;
+package robomap.model.robot;
 
-public class RobotSetting {
+import java.io.Serializable;
+
+import robomap.model.base.Location;
+
+public class RobotSetting implements Serializable {
+	
+	private static final long serialVersionUID = -7528580322033068828L;
 	
 	Location startLocation;
 	

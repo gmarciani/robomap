@@ -1,6 +1,6 @@
 package robomap.database;
 
-import robomap.model.Door;
+import robomap.model.home.Door;
 
 public interface DoorDAO {
 	
