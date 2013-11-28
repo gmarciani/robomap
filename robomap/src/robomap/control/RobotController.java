@@ -1,7 +1,6 @@
 package robomap.control;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,23 +29,25 @@ import robomap.model.object.Action;
 import robomap.model.object.Object;
 import robomap.model.robot.Movement;
 
-public class RobotController {
+public class RobotController {	
 	
-	private static RobotController robotController;
-	private static DisplayController displayController;
 	private static XMLController xmlController;
 	private static GraphController graphController;
+	private static DisplayController displayController;
 	
 	private static HomeDAO homeDAO;
 	private static RoomDAO roomDAO;
 	private static ObjectDAO objectDAO;
 	private static ActionDAO actionDAO;
 	
+	private String robotName;
 	private Home currentHome;
 	private Location currentLocation;
+	private Object payload;
 	private DirectedGraph<Node, Arc> graph;
 		
-	private RobotController() {
+	public RobotController(String robotName) {
+		this.setRobotName(robotName);
 		displayController = DisplayController.getInstance();
 		xmlController = XMLController.getInstance();
 		graphController = GraphController.getInstance();
@@ -56,44 +57,53 @@ public class RobotController {
 		actionDAO = ActionJDBCDAO.getInstance();
 	}
 	
-	public static RobotController getInstance() {
-		if(robotController == null) {
-			robotController = new RobotController();
-		}
-		return robotController;
+	public String getRobotName() {
+		return this.robotName;
+	}
+
+	public void setRobotName(String robotName) {
+		this.robotName = robotName;
+	}
+	
+	public Object getPayload() {
+		return this.payload;
+	}
+
+	public void setPayload(Object payload) {
+		this.payload = payload;
 	}
 	
 	public void move(Movement movement) {
-		int currX = this.getCurrentLocation().getX();
-		int currY = this.getCurrentLocation().getY();
-		int moveX = (movement.getDirection() == Direction.RIGHT) ? 1 : -1;
-		int moveY = (movement.getDirection() == Direction.FORWARD) ? 1 : -1;
-		Location newLocation = new Location(currX + moveX, currY + moveY);
+		Location newLocation = Location.computeLocation(this.getCurrentLocation(), movement);
 		this.setCurrentLocation(newLocation);
 		Log.printMovement(movement);
 	}
 	
-	public List<Home> importHomeFromXML(String path) {
-		List<Home> listHomes = new ArrayList<Home>();
+	public void move(PathPlan pathPlan) {
+		for (Movement movement : pathPlan.getMovements()) {
+			this.refreshGraph();
+		}
+	}
+	
+	public Home importHomeFromXML(String path) {
+		Home home = null;
 		try {
-			listHomes = xmlController.parsePlanimetry(path);
+			home = xmlController.parsePlanimetry(path);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			Log.printXMLException("RobotController", "ImportHomeFromXML", e);
 		}
-		/*
-		for (Home home : listHomes) {
-			homeDAO.saveHome(home);
-		}*/
-		displayController.showImportedHomes(listHomes);
-		return listHomes;
+		
+		homeDAO.saveHome(home);
+		
+		displayController.showImportedHome(this.getRobotName(), home);
+		return home;
 	}
 	
-	public Home selectHome() {
+	public void selectHome() {
 		List<Home> allHomes = homeDAO.getAll();
-		int choice = displayController.selectHome(allHomes);
+		int choice = displayController.selectHome(this.getRobotName(), allHomes);
 		Home selectedHome = allHomes.get(choice);
 		this.setCurrentHome(selectedHome);
-		return selectedHome;
 	}
 	
 	public Home getCurrentHome() {
@@ -105,6 +115,7 @@ public class RobotController {
 		this.setGraph(graphController.parseGraph(home));
 		Location startLocation = this.getStartLocation();
 		this.setCurrentLocation(startLocation);
+		displayController.showCurrentStatus(this.getRobotName(), this.getCurrentHome(), this.getCurrentLocation());
 	}
 	
 	public Location getCurrentLocation() {
@@ -113,6 +124,7 @@ public class RobotController {
 
 	public void setCurrentLocation(Location currentLocation) {
 		this.currentLocation = currentLocation;
+		if (this.getPayload() != null) objectDAO.setLocation(this.getPayload(), currentLocation);
 	}	
 	
 	public DirectedGraph<Node, Arc> getGraph() {
@@ -121,6 +133,12 @@ public class RobotController {
 
 	public void setGraph(DirectedGraph<Node, Arc> graph) {
 		this.graph = graph;
+	}
+	
+	private void refreshGraph() {
+		Home home = this.getCurrentHome();
+		DirectedGraph<Node, Arc> graph = graphController.parseGraph(home);
+		this.setGraph(graph);
 	}
 
 	public Location getStartLocation() {
@@ -131,51 +149,10 @@ public class RobotController {
 
 	public PathPlan getPathPlanTo(Location destination) {
 		Location source = this.getCurrentLocation();
+		this.refreshGraph();
 		Path path = graphController.computePath(this.getGraph(), source, destination);
-		PathPlan pathPlan = new PathPlan();
-		for (Arc arc : path.getArcs()) {
-			Movement movement = this.getMovementFromArc(arc);
-			pathPlan.addMovement(movement);
-		}
+		PathPlan pathPlan = PathPlan.computePathPlan(path);
 		return pathPlan;
-	}
-
-	private Movement getMovementFromArc(Arc arc) {
-		Location source = arc.getSource().getLocation();
-		Location destination = arc.getDestination().getLocation();
-		float module = arc.getWeight();
-		Direction direction;
-		int sourceX = source.getX();
-		int sourceY = source.getY();
-		int destinationX = destination.getX();
-		int destinationY = destination.getY();
-		if(destinationX > sourceX) {
-			if(destinationY > sourceY) {
-				direction = Direction.DIAGONAL_TOP_RIGHT;
-			} else if(destinationY < sourceY) {
-				direction = Direction.DIAGONAL_BOTTOM_RIGHT;
-			} else {
-				direction = Direction.RIGHT;
-			}
-			
-		} else if(destinationX < sourceX){
-			if(destinationY > sourceY) {
-				direction = Direction.DIAGONAL_TOP_LEFT;
-			} else if(destinationY < sourceY) {
-				direction = Direction.DIAGONAL_BOTTOM_LEFT;
-			} else {
-				direction = Direction.LEFT;
-			}
-		} else {
-			if(destinationY > sourceY) {
-				direction = Direction.FORWARD;
-			} else if(destinationY < sourceY) {
-				direction = Direction.BACK;
-			} else {
-				direction = Direction.NONE;
-			}
-		}
-		return new Movement(direction, module);
 	}
 
 	public Location getLocation(Room room) {
@@ -186,8 +163,8 @@ public class RobotController {
 		return objectDAO.getLocation(object);
 	}
 	
-	public Location getLocation(Object object, String actionName) {
-		return objectDAO.getLocation(object, actionName);
+	public Location getLocation(Object object, Action action) {
+		return objectDAO.getLocation(object, action);
 	}
 
 	public Location getLocation(Object object, Direction direction) {
@@ -198,23 +175,29 @@ public class RobotController {
 		return objectDAO.getActions(object);
 	}
 	
-	public void doAction(Object object, String actionName) {
-		if (this.checkActionAvailability(object, actionName) && 
-				this.getCurrentLocation().equals(objectDAO.getLocationForAction(object, actionName))) {
-			Action action = actionDAO.getAction(actionName);
+	public void doAction(Object object, Action action) {
+		if (this.getCurrentLocation().equals(objectDAO.getLocation(object, action))) {
 			objectDAO.changeStatus(object, action.getStatus());
 			Log.printAction(object, action);
 		}		
 	}
-	
-	private boolean checkActionAvailability(Object object, String actionName) {
-		Action action = actionDAO.getAction(actionName);
-		return objectDAO.checkActionAvailability(object, action);
-	}	
-	
-	public int getUserChoice(List<String> choices) {
-		int choice = displayController.choose(choices);
-		return choice;
+
+	public Action selectAction(Object object) {
+		List<Action> actions = actionDAO.getActions(object);
+		int choice = displayController.selectAction(this.getRobotName(), actions);
+		Action action = actions.get(choice);
+		return action;
+	}
+
+	public void addPayload(Object object) {
+		this.setPayload(object);		
+	}
+
+	public void releasePayload() {
+		Object object = this.getPayload();
+		Location location = this.getCurrentLocation();
+		objectDAO.setLocation(object, location);
+		this.setPayload(null);		
 	}
 
 }
