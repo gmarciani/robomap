@@ -19,14 +19,12 @@ public interface ObjectDAO {
 
 	public void changeStatus(Object object, String newStatus);
 
-	public java.lang.Object getLocationForAction(Object object, String action);
-
-	public boolean checkActionAvailability(Object object, Action action);
-
 	public Location getLocation(Object object);
 
-	public Location getLocation(Object object, String actionName);
+	public Location getLocation(Object object, Action action);
 
 	public Location getLocation(Object object, Direction direction);
+
+	public void setLocation(Object payload, Location currentLocation);
 
 }

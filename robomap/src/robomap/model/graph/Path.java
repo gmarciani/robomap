@@ -14,7 +14,7 @@ public class Path implements Serializable {
 	}
 
 	public List<Arc> getArcs() {
-		return arcs;
+		return this.arcs;
 	}
 
 	public void setArcs(List<Arc> arcs) {

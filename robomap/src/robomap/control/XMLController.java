@@ -2,8 +2,6 @@ package robomap.control;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -38,10 +36,9 @@ public class XMLController {
 		return xmlController;
 	}
 	
-	public List<Home> parsePlanimetry(String path) throws ParserConfigurationException, SAXException, IOException {
+	public Home parsePlanimetry(String path) throws ParserConfigurationException, SAXException, IOException {
 		File file = new File(path);
-		
-		List<Home> listHomes = new ArrayList<Home>();
+		Home home = null;
 		
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();		
 		Document doc = documentBuilder.parse(file);
@@ -53,7 +50,7 @@ public class XMLController {
 			String homeName = elementHome.getAttribute("name");
 			int homeWidth = Integer.valueOf(elementHome.getAttribute("width"));
 			int homeHeight = Integer.valueOf(elementHome.getAttribute("height"));
-			Home home = new Home(homeName, new Dimension(homeWidth, homeHeight));
+			home = new Home(homeName, new Dimension(homeWidth, homeHeight));
 			
 			NodeList nodesRoom = elementHome.getElementsByTagName("ROOM");
 			NodeList nodesWall = elementHome.getElementsByTagName("WALL");
@@ -103,12 +100,9 @@ public class XMLController {
 				Door door = new Door(new Dimension(doorWidth, doorHeight), new Location(doorLocationX, doorLocationY));
 				home.addDoor(door);				
 			}
-			
-			
-			listHomes.add(home);
 		}
 		
-		return listHomes;
+		return home;
 		
 	}
 

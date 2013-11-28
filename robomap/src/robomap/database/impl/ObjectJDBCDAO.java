@@ -93,25 +93,13 @@ public class ObjectJDBCDAO implements ObjectDAO {
 	}
 
 	@Override
-	public java.lang.Object getLocationForAction(Object object, String action) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean checkActionAvailability(Object object, Action action) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public Location getLocation(Object object) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Location getLocation(Object object, String actionName) {
+	public Location getLocation(Object object, Action action) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -120,6 +108,12 @@ public class ObjectJDBCDAO implements ObjectDAO {
 	public Location getLocation(Object object, Direction direction) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void setLocation(Object payload, Location currentLocation) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

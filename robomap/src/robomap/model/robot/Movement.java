@@ -3,6 +3,8 @@ package robomap.model.robot;
 import java.io.Serializable;
 
 import robomap.model.base.Direction;
+import robomap.model.base.Location;
+import robomap.model.graph.Arc;
 
 public class Movement implements Serializable {
 
@@ -56,6 +58,14 @@ public class Movement implements Serializable {
 		return "Movement(" + 
 				this.getDirection().getName() + " " +
 				this.getModule() + ")";
+	}
+	
+	public static Movement computeMovement(Arc arc) {
+		Location source = arc.getSource().getLocation();
+		Location destination = arc.getDestination().getLocation();		
+		float module = arc.getWeight();
+		Direction direction = Direction.computeDirection(source, destination);
+		return new Movement(direction, module);
 	}
 
 }

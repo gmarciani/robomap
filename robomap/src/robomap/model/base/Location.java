@@ -2,6 +2,8 @@ package robomap.model.base;
 
 import java.io.Serializable;
 
+import robomap.model.robot.Movement;
+
 public class Location implements Serializable {
 
 	private static final long serialVersionUID = -9033935801147702920L;
@@ -30,6 +32,14 @@ public class Location implements Serializable {
 		this.y = y;
 	}
 	
+	public static Location computeLocation(Location currentLocation, Movement movement) {
+		int currX = currentLocation.getX();
+		int currY = currentLocation.getY();
+		int moveX = (int) (movement.getModule() * movement.getDirection().getVersorX());
+		int moveY = (int) (movement.getModule() * movement.getDirection().getVersorY());
+		return new Location(currX + moveX, currY + moveY);
+	}
+	
 	@Override
     public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()) return false;
@@ -53,6 +63,6 @@ public class Location implements Serializable {
 		return "Location(" + 
 				this.getX() + ";" + 
 				this.getY() + ")";
-	}
+	}	
 
 }
