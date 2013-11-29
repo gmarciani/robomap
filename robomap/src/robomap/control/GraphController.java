@@ -23,9 +23,7 @@ public class GraphController {
 	
 	private static GraphController graphController;
 	
-	private GraphController() {
-		
-	}
+	private GraphController() {}
 	
 	public static GraphController getInstance() {
 		if(graphController == null) {
@@ -132,7 +130,7 @@ public class GraphController {
 		return false;
 	}
 
-	public Path computePath(DirectedGraph<Node, Arc> graph, Location source, Location destination) {
+	private Path computePath(DirectedGraph<Node, Arc> graph, Location source, Location destination) {
 		Transformer<Arc, Float> transformer = new Transformer<Arc, Float>() {
 			public Float transform(Arc arc) {
 				return arc.getWeight();
@@ -141,6 +139,12 @@ public class GraphController {
 		DijkstraShortestPath<Node, Arc> alg = new DijkstraShortestPath<Node, Arc>(graph, transformer);		
 		List<Arc> listArc = alg.getPath(new Node(source), new Node(destination));
 		return new Path(listArc);
+	}
+	
+	public Path computePath(Home home, Location source, Location destination) {
+		DirectedGraph<Node, Arc> graph = this.parseGraph(home);
+		Path path = this.computePath(graph, source, destination);
+		return path;
 	}
 	
 }

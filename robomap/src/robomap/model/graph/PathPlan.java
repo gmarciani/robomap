@@ -14,7 +14,8 @@ public class PathPlan implements Serializable {
 	
 	private Location source;
 	private Location destination;
-	private List<Movement> movements = new ArrayList<Movement>();;
+	private List<Movement> movements = new ArrayList<Movement>();
+	private int nextMovement = 0;
 	
 	public PathPlan(Location source, Location destination, List<Movement> movements) {
 		this.setSource(source);
@@ -74,6 +75,12 @@ public class PathPlan implements Serializable {
 			movements.add(movement);
 		}
 		return new PathPlan(source, destination, movements);
+	}
+
+	public Movement getNextMovement() {
+		Movement movement = this.getMovements().get(nextMovement);
+		nextMovement ++;
+		return movement;
 	}	
 
 }

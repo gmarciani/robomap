@@ -116,4 +116,10 @@ public class ObjectJDBCDAO implements ObjectDAO {
 		
 	}
 
+	@Override
+	public boolean isThereAny(Location nextLocation) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

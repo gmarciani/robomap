@@ -27,4 +27,6 @@ public interface ObjectDAO {
 
 	public void setLocation(Object payload, Location currentLocation);
 
+	public boolean isThereAny(Location nextLocation);
+
 }

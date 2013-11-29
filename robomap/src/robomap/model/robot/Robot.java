@@ -44,14 +44,6 @@ public class Robot implements Serializable {
 		return robotController.getCurrentHome();
 	}
 	
-	public Location getCurrentLocation() {
-		return robotController.getCurrentLocation();
-	}
-	
-	public void move(Movement movement) {
-		robotController.move(movement);
-	}
-	
 	public void goTo(Location destination) {
 		PathPlan pathPlan = robotController.getPathPlanTo(destination);
 		robotController.move(pathPlan);

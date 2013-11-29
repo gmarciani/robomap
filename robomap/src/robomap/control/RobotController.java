@@ -7,7 +7,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
 import robomap.database.ActionDAO;
 import robomap.database.HomeDAO;
 import robomap.database.ObjectDAO;
@@ -19,8 +18,6 @@ import robomap.database.impl.RoomJDBCDAO;
 import robomap.log.Log;
 import robomap.model.base.Direction;
 import robomap.model.base.Location;
-import robomap.model.graph.Arc;
-import robomap.model.graph.Node;
 import robomap.model.graph.Path;
 import robomap.model.graph.PathPlan;
 import robomap.model.home.Home;
@@ -31,30 +28,32 @@ import robomap.model.robot.Movement;
 
 public class RobotController {	
 	
-	private static XMLController xmlController;
-	private static GraphController graphController;
-	private static DisplayController displayController;
+	private XMLController xmlController;
+	private GraphController graphController;
+	private DisplayController displayController;
+	private GPSController gpsController;
+	private MotorController motorController;
 	
-	private static HomeDAO homeDAO;
-	private static RoomDAO roomDAO;
-	private static ObjectDAO objectDAO;
-	private static ActionDAO actionDAO;
+	private HomeDAO homeDAO;
+	private RoomDAO roomDAO;
+	private ObjectDAO objectDAO;
+	private ActionDAO actionDAO;
 	
 	private String robotName;
 	private Home currentHome;
-	private Location currentLocation;
 	private Object payload;
-	private DirectedGraph<Node, Arc> graph;
 		
 	public RobotController(String robotName) {
 		this.setRobotName(robotName);
-		displayController = DisplayController.getInstance();
-		xmlController = XMLController.getInstance();
-		graphController = GraphController.getInstance();
-		homeDAO = HomeJDBCDAO.getInstance();
-		roomDAO = RoomJDBCDAO.getInstance();
-		objectDAO = ObjectJDBCDAO.getInstance();
-		actionDAO = ActionJDBCDAO.getInstance();
+		this.gpsController = new GPSController();
+		this.motorController = new MotorController(this.gpsController);
+		this.displayController = DisplayController.getInstance();
+		this.xmlController = XMLController.getInstance();
+		this.graphController = GraphController.getInstance();
+		this.homeDAO = HomeJDBCDAO.getInstance();
+		this.roomDAO = RoomJDBCDAO.getInstance();
+		this.objectDAO = ObjectJDBCDAO.getInstance();
+		this.actionDAO = ActionJDBCDAO.getInstance();
 	}
 	
 	public String getRobotName() {
@@ -73,35 +72,53 @@ public class RobotController {
 		this.payload = payload;
 	}
 	
-	public void move(Movement movement) {
-		Location newLocation = Location.computeLocation(this.getCurrentLocation(), movement);
-		this.setCurrentLocation(newLocation);
-		Log.printMovement(movement);
+	private void move(Movement movement) {
+		this.motorController.move(movement);
+		this.displayController.showStatus(this.getRobotName(), this.getCurrentHome(), this.gpsController.getLocation());
 	}
 	
 	public void move(PathPlan pathPlan) {
-		for (Movement movement : pathPlan.getMovements()) {
-			this.refreshGraph();
+		Location destination = pathPlan.getDestination();
+		while (!this.gpsController.getLocation().equals(destination)) {
+			Movement nextMovement = pathPlan.getNextMovement();
+			Location nextLocation = Location.computeLocation(this.gpsController.getLocation(), nextMovement);
+			if (this.objectDAO.isThereAny(nextLocation)) {
+				pathPlan = this.getPathPlanTo(destination);
+				continue;
+			}
+			this.unlockLocation(this.gpsController.getLocation());
+			this.lockLocation(nextLocation);
+			this.move(nextMovement);
 		}
 	}
 	
+	private void lockLocation(Location nextLocation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void unlockLocation(Location location) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public Home importHomeFromXML(String path) {
 		Home home = null;
 		try {
-			home = xmlController.parsePlanimetry(path);
+			home = this.xmlController.parsePlanimetry(path);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			Log.printXMLException("RobotController", "ImportHomeFromXML", e);
 		}
 		
-		homeDAO.saveHome(home);
+		this.homeDAO.saveHome(home);
 		
-		displayController.showImportedHome(this.getRobotName(), home);
+		this.displayController.showImportedHome(this.getRobotName(), home);
 		return home;
 	}
 	
 	public void selectHome() {
-		List<Home> allHomes = homeDAO.getAll();
-		int choice = displayController.selectHome(this.getRobotName(), allHomes);
+		List<Home> allHomes = this.homeDAO.getAll();
+		int choice = this.displayController.selectHome(this.getRobotName(), allHomes);
 		Home selectedHome = allHomes.get(choice);
 		this.setCurrentHome(selectedHome);
 	}
@@ -112,79 +129,54 @@ public class RobotController {
 
 	public void setCurrentHome(Home home) {
 		this.currentHome = home;
-		this.setGraph(graphController.parseGraph(home));
 		Location startLocation = this.getStartLocation();
-		this.setCurrentLocation(startLocation);
-		displayController.showCurrentStatus(this.getRobotName(), this.getCurrentHome(), this.getCurrentLocation());
-	}
-	
-	public Location getCurrentLocation() {
-		return this.currentLocation;
-	}
-
-	public void setCurrentLocation(Location currentLocation) {
-		this.currentLocation = currentLocation;
-		if (this.getPayload() != null) objectDAO.setLocation(this.getPayload(), currentLocation);
-	}	
-	
-	public DirectedGraph<Node, Arc> getGraph() {
-		return this.graph;
-	}
-
-	public void setGraph(DirectedGraph<Node, Arc> graph) {
-		this.graph = graph;
-	}
-	
-	private void refreshGraph() {
-		Home home = this.getCurrentHome();
-		DirectedGraph<Node, Arc> graph = graphController.parseGraph(home);
-		this.setGraph(graph);
+		this.gpsController.setLocation(startLocation);
+		this.displayController.showStatus(this.getRobotName(), this.getCurrentHome(), this.gpsController.getLocation());
 	}
 
 	public Location getStartLocation() {
 		Home home = this.getCurrentHome();
-		Location startLocation = homeDAO.getStartLocation(home);
+		Location startLocation = this.homeDAO.getStartLocation(home);
 		return startLocation;
 	}
 
 	public PathPlan getPathPlanTo(Location destination) {
-		Location source = this.getCurrentLocation();
-		this.refreshGraph();
-		Path path = graphController.computePath(this.getGraph(), source, destination);
+		Location source = this.gpsController.getLocation();
+		Path path = this.graphController.computePath(this.getCurrentHome(), source, destination);
 		PathPlan pathPlan = PathPlan.computePathPlan(path);
 		return pathPlan;
 	}
 
 	public Location getLocation(Room room) {
-		return roomDAO.getLocation(room);
+		return this.roomDAO.getLocation(room);
 	}
 
 	public Location getLocation(Object object) {
-		return objectDAO.getLocation(object);
+		return this.objectDAO.getLocation(object);
 	}
 	
 	public Location getLocation(Object object, Action action) {
-		return objectDAO.getLocation(object, action);
+		return this.objectDAO.getLocation(object, action);
 	}
 
 	public Location getLocation(Object object, Direction direction) {
-		return objectDAO.getLocation(object,  direction);
+		return this.objectDAO.getLocation(object,  direction);
 	}
 
 	public List<String> getAvailableActions(Object object) {
-		return objectDAO.getActions(object);
+		return this.objectDAO.getActions(object);
 	}
 	
 	public void doAction(Object object, Action action) {
-		if (this.getCurrentLocation().equals(objectDAO.getLocation(object, action))) {
-			objectDAO.changeStatus(object, action.getStatus());
+		if (this.gpsController.getLocation().equals(this.objectDAO.getLocation(object, action))) {
+			this.objectDAO.changeStatus(object, action.getStatus());
 			Log.printAction(object, action);
 		}		
 	}
 
 	public Action selectAction(Object object) {
-		List<Action> actions = actionDAO.getActions(object);
-		int choice = displayController.selectAction(this.getRobotName(), actions);
+		List<Action> actions = this.actionDAO.getActions(object);
+		int choice = this.displayController.selectAction(this.getRobotName(), actions);
 		Action action = actions.get(choice);
 		return action;
 	}
@@ -195,8 +187,8 @@ public class RobotController {
 
 	public void releasePayload() {
 		Object object = this.getPayload();
-		Location location = this.getCurrentLocation();
-		objectDAO.setLocation(object, location);
+		Location location = this.gpsController.getLocation();
+		this.objectDAO.setLocation(object, location);
 		this.setPayload(null);		
 	}
 
