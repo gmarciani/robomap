@@ -1,33 +1,29 @@
-package robomap.model.base;
+package robomap.model.vector;
 
 import java.io.Serializable;
 
-public class Dimension implements Serializable {
+public class Dimension extends Vector implements Serializable {
 	
 	private static final long serialVersionUID = -367509300511668919L;
 	
-	private int width;
-	private int height;
-	
 	public Dimension(int width, int height) {
-		this.setWidth(width);
-		this.setHeight(height);
+		super(width, height);
 	}
 
 	public int getWidth() {
-		return this.width;
+		return this.getX();
 	}
 
 	public void setWidth(int width) {
-		this.width = width;
+		this.setX(width);
 	}
 
 	public int getHeight() {
-		return this.height;
+		return this.getY();
 	}
 
 	public void setHeight(int height) {
-		this.height = height;
+		this.setY(height);
 	}
 	
 	@Override

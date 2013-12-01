@@ -1,46 +1,46 @@
-package robomap.model.base;
+package robomap.model.vector;
 
 import java.io.Serializable;
 
 public enum Direction implements Serializable {
 	
-	FORWARD("Forward", 0, 1),
-	BACK("Back", 0, -1),
-	LEFT("Left", -1, 0),
-	RIGHT("Right", 1, 0),
-	DIAGONAL_TOP_LEFT("DiagonalTopLeft", -1, 1),
-	DIAGONAL_TOP_RIGHT("DiagonalTopRight", 1, 1),
-	DIAGONAL_BOTTOM_LEFT("DiagonalBottomLeft", -1, -1),
-	DIAGONAL_BOTTOM_RIGHT("DiagonalBottomRight", 1, -1),
-	NONE("None", 0, 0);
+	FORWARD("Forward", new Vector(0, 1), 0),
+	BACK("Back", new Vector(0, -1), 180),
+	LEFT("Left", new Vector(-1, 0), 90),
+	RIGHT("Right", new Vector(1, 0), -90),
+	DIAGONAL_TOP_LEFT("DiagonalTopLeft", new Vector(-1, 1), 45),
+	DIAGONAL_TOP_RIGHT("DiagonalTopRight", new Vector(1, 1), -45),
+	DIAGONAL_BOTTOM_LEFT("DiagonalBottomLeft", new Vector(-1, -1), 135),
+	DIAGONAL_BOTTOM_RIGHT("DiagonalBottomRight", new Vector(1, -1), -135),
+	NONE("None", new Vector(0, 0), 0);
 	
 	private final String name;
-	private final float versorX;
-	private final float versorY;
+	private final Vector versor;
+	private final int rotation;
 	
-	Direction(final String name, final float versorX, final float versorY) {
+	Direction(final String name, final Vector versor, final int rotation) {
 		this.name = name;
-		this.versorX = versorX;
-		this.versorY = versorY;
+		this.versor = versor;
+		this.rotation = rotation;
 	}
 
 	public String getName() {
 		return this.name;
 	}
 	
-	public float getVersorX() {
-		return this.versorX;
+	public Vector getVersor() {
+		return this.versor;
 	}
 	
-	public float getVersorY() {
-		return this.versorY;
+	public int getRotation() {
+		return this.rotation;
 	}
 
 	public static Direction computeDirection(Location source, Location destination) {
-		int sourceX = source.getX();
-		int sourceY = source.getY();
-		int destinationX = destination.getX();
-		int destinationY = destination.getY();
+		double sourceX = source.getX();
+		double sourceY = source.getY();
+		double destinationX = destination.getX();
+		double destinationY = destination.getY();
 		
 		if(destinationX > sourceX) {
 			if(destinationY > sourceY) {

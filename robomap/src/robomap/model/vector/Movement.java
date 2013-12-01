@@ -1,9 +1,7 @@
-package robomap.model.robot;
+package robomap.model.vector;
 
 import java.io.Serializable;
 
-import robomap.model.base.Direction;
-import robomap.model.base.Location;
 import robomap.model.graph.Arc;
 
 public class Movement implements Serializable {
@@ -30,8 +28,8 @@ public class Movement implements Serializable {
 		return this.module;
 	}
 
-	public void setModule(float weight) {
-		this.module = weight;
+	public void setModule(float module) {
+		this.module = module;
 	}
 	
 	@Override

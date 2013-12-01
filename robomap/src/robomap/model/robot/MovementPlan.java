@@ -1,14 +1,16 @@
-package robomap.model.graph;
+package robomap.model.robot;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import robomap.model.base.Direction;
-import robomap.model.base.Location;
-import robomap.model.robot.Movement;
+import robomap.model.graph.Arc;
+import robomap.model.graph.Path;
+import robomap.model.vector.Direction;
+import robomap.model.vector.Location;
+import robomap.model.vector.Movement;
 
-public class PathPlan implements Serializable {
+public class MovementPlan implements Serializable {
 	
 	private static final long serialVersionUID = -3311063790419252246L;
 	
@@ -17,13 +19,13 @@ public class PathPlan implements Serializable {
 	private List<Movement> movements = new ArrayList<Movement>();
 	private int nextMovement = 0;
 	
-	public PathPlan(Location source, Location destination, List<Movement> movements) {
+	public MovementPlan(Location source, Location destination, List<Movement> movements) {
 		this.setSource(source);
 		this.setDestination(destination);
 		this.setMovements(movements);
 	}
 	
-	public PathPlan() {
+	public MovementPlan() {
 		
 	}
 	
@@ -62,10 +64,10 @@ public class PathPlan implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "PathPlan(" + this.getMovements().toString() + ")";
+		return "MovementPlan(" + this.getMovements().toString() + ")";
 	}
 
-	public static PathPlan computePathPlan(Path path) {
+	public static MovementPlan computeMovementPlan(Path path) {
 		List<Arc> arcs = path.getArcs();
 		List<Movement> movements = new ArrayList<Movement>();
 		Location source = arcs.get(0).getSource().getLocation();
@@ -74,7 +76,7 @@ public class PathPlan implements Serializable {
 			Movement movement = Movement.computeMovement(arc);
 			movements.add(movement);
 		}
-		return new PathPlan(source, destination, movements);
+		return new MovementPlan(source, destination, movements);
 	}
 
 	public Movement getNextMovement() {
