@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import robomap.model.base.Dimension;
+import robomap.model.vector.Dimension;
+import robomap.model.vector.Location;
+import robomap.model.vector.Vector;
 
 public class Home implements Serializable {
 	
@@ -12,13 +14,15 @@ public class Home implements Serializable {
 	
 	private String name;
 	private Dimension dimension;
+	private Location start;
 	private List<Room> rooms = new ArrayList<Room>();
 	private List<Wall> walls = new ArrayList<Wall>();
 	private List<Door> doors = new ArrayList<Door>();
 	
-	public Home(String name, Dimension dimension, List<Room> rooms, List<Wall> walls, List<Door> doors) {
+	public Home(String name, Dimension dimension, Location start, List<Room> rooms, List<Wall> walls, List<Door> doors) {
 		this.setName(name);
 		this.setDimension(dimension);
+		this.setStart(start);
 		this.setRooms(rooms);
 		this.setWalls(walls);
 		this.setDoors(doors);
@@ -55,6 +59,14 @@ public class Home implements Serializable {
 
 	public void setDimension(Dimension dimension) {
 		this.dimension = dimension;
+	}
+	
+	public Location getStart() {
+		return this.start;
+	}
+
+	public void setStart(Location start) {
+		this.start = start;
 	}
 
 	public List<Room> getRooms() {
@@ -98,9 +110,18 @@ public class Home implements Serializable {
 		return "Home(" + 
 				this.getName() + ";" + 
 				this.getDimension().toString() + ";" + 
+				this.getStart().toString() + ";" +
 				this.getRooms().toString() + ";" + 
 				this.getWalls().toString() + ";" + 
 				this.getDoors().toString() + ")";
+	}
+
+	public boolean comprehend(Location location) {
+		Location homeLocation = new Location(0,0);
+		return ((location.compareTo(homeLocation) == 1 ||  
+				location.compareTo(homeLocation) == 0) &&
+				(location.compareTo(Vector.sum(homeLocation, this.getDimension())) == -1 || 
+				location.compareTo(Vector.sum(homeLocation, this.getDimension())) == 0));
 	}
 
 }

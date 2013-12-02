@@ -2,8 +2,8 @@ package robomap.model.home;
 
 import java.io.Serializable;
 
-import robomap.model.base.Dimension;
-import robomap.model.base.Location;
+import robomap.model.vector.Dimension;
+import robomap.model.vector.Location;
 
 public class Door implements Serializable {
 	

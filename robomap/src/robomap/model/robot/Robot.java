@@ -3,24 +3,22 @@ package robomap.model.robot;
 import java.io.Serializable;
 
 import robomap.control.RobotController;
-import robomap.model.base.Direction;
-import robomap.model.base.Location;
-import robomap.model.graph.PathPlan;
 import robomap.model.home.Home;
-import robomap.model.home.Room;
 import robomap.model.object.Action;
 import robomap.model.object.Object;
+import robomap.model.vector.Direction;
+import robomap.model.vector.Location;
 
 public class Robot implements Serializable {	
 
 	private static final long serialVersionUID = -1567873543517965494L;
 	
 	private String name;
-	private static RobotController robotController;
+	private RobotController robotController;
 	
 	public Robot(String name) {
 		this.setName(name);
-		robotController = new RobotController(name);
+		this.robotController = new RobotController(name);
 	}
 	
 	public String getName() {
@@ -31,64 +29,67 @@ public class Robot implements Serializable {
 		this.name = name;
 	}
 	
-	public void importHomeFromXML(String xmlFilePath) {
-		Home home = robotController.importHomeFromXML(xmlFilePath);
-		robotController.setCurrentHome(home);
+	public Home importHomeFromXML(String xmlFilePath) {
+		Home home = this.robotController.importHomeFromXML(xmlFilePath);
+		return home;
 	}	
 	
-	public void selectHome() {
-		robotController.selectHome();
+	public void setHome(Home home) {
+		this.robotController.setCurrentHome(home);
 	}
 	
-	public Home getCurrentHome() {
-		return robotController.getCurrentHome();
+	public void selectHome() {
+		this.robotController.selectHome();
 	}
 	
 	public void goTo(Location destination) {
-		PathPlan pathPlan = robotController.getPathPlanTo(destination);
-		robotController.move(pathPlan);
+		MovementPlan movementPlan = this.robotController.getMovementPlanTo(destination);
+		this.robotController.move(movementPlan);
 	}
 	
 	public void goToStart() {
-		Location location = robotController.getStartLocation();
-		PathPlan pathPlan = robotController.getPathPlanTo(location);
-		robotController.move(pathPlan);
+		Location location = this.robotController.getStartLocation();
+		MovementPlan movementPlan = this.robotController.getMovementPlanTo(location);
+		this.robotController.move(movementPlan);
 	}
 
-	public void goTo(Room room) {
-		Location location = robotController.getLocation(room);
-		PathPlan pathPlan = robotController.getPathPlanTo(location);
-		robotController.move(pathPlan);
+	public void goTo(String roomName) {
+		Location location = this.robotController.getRoomLocation(roomName);
+		MovementPlan movementPlan = this.robotController.getMovementPlanTo(location);
+		this.robotController.move(movementPlan);
 	}
 	
-	public void goTo(Object object) {
-		Location location = robotController.getLocation(object);
-		PathPlan pathPlan = robotController.getPathPlanTo(location);
-		robotController.move(pathPlan);
+	public void goTo(String roomName, String objectName) {
+		Location location = this.robotController.getObjectLocation(roomName, objectName);
+		MovementPlan movementPlan = this.robotController.getMovementPlanTo(location);
+		this.robotController.move(movementPlan);
 	}
 	
-	public void goTo(Object object, Direction direction) {
-		Location location = robotController.getLocation(object, direction);
-		PathPlan pathPlan = robotController.getPathPlanTo(location);
-		robotController.move(pathPlan);		
+	public void goTo(String roomName, String objectName, Direction direction) {
+		Location location = this.robotController.getObjectLocation(roomName, objectName, direction);
+		MovementPlan movementPlan = this.robotController.getMovementPlanTo(location);
+		this.robotController.move(movementPlan);		
 	}
 	
-	public void moveObject(Object object, Location destination) {
-		Location location = robotController.getLocation(object);
-		PathPlan pathPlanToObject = robotController.getPathPlanTo(location);
-		robotController.move(pathPlanToObject);
-		robotController.addPayload(object);
-		PathPlan pathPlantoDestination = robotController.getPathPlanTo(destination);
-		robotController.move(pathPlantoDestination);
-		robotController.releasePayload();
+	public void moveObject(String roomName, String objectName, Location destination, Direction orientation) {
+		Object object = this.robotController.getObject(roomName, objectName);
+		Location objectLocation = object.getLocation();
+		MovementPlan movementPlanToObject = this.robotController.getMovementPlanTo(objectLocation);
+		this.robotController.move(movementPlanToObject);
+		this.robotController.addPayload(object);
+		MovementPlan movementPlanToDestination = this.robotController.getMovementPlanTo(destination);
+		this.robotController.move(movementPlanToDestination);
+		this.robotController.setObjectOrientation(roomName, objectName, orientation);
+		this.robotController.releasePayload();
 	}
 	
-	public void makeActionOn(Object object) {
-		Action action = robotController.selectAction(object);
-		Location location = robotController.getLocation(object, action);
-		PathPlan pathPlan = robotController.getPathPlanTo(location);
-		robotController.move(pathPlan);		
-		robotController.doAction(object, action);
+	public void makeActionOn(String roomName, String objectName) {
+		Object object = this.robotController.getObject(roomName, objectName);
+		Action action = this.robotController.selectAction(object);
+		Location location = object.getLocation();
+		MovementPlan movementPlan = this.robotController.getMovementPlanTo(location);
+		this.robotController.move(movementPlan);		
+		this.robotController.doAction(object, action);
 	}
 
 }

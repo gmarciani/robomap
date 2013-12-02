@@ -25,10 +25,6 @@ public class MovementPlan implements Serializable {
 		this.setMovements(movements);
 	}
 	
-	public MovementPlan() {
-		
-	}
-	
 	public List<Movement> getMovements() {
 		return this.movements;
 	}
@@ -47,7 +43,7 @@ public class MovementPlan implements Serializable {
 	}
 
 	public Location getSource() {
-		return source;
+		return this.source;
 	}
 
 	public void setSource(Location source) {
@@ -55,12 +51,18 @@ public class MovementPlan implements Serializable {
 	}
 
 	public Location getDestination() {
-		return destination;
+		return this.destination;
 	}
 
 	public void setDestination(Location destination) {
 		this.destination = destination;
 	}
+	
+	public Movement getNextMovement() {
+		Movement movement = this.getMovements().get(nextMovement);
+		nextMovement ++;
+		return movement;
+	}	
 	
 	@Override
 	public String toString() {
@@ -77,12 +79,6 @@ public class MovementPlan implements Serializable {
 			movements.add(movement);
 		}
 		return new MovementPlan(source, destination, movements);
-	}
-
-	public Movement getNextMovement() {
-		Movement movement = this.getMovements().get(nextMovement);
-		nextMovement ++;
-		return movement;
 	}	
 
 }

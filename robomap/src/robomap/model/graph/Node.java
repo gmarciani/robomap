@@ -2,7 +2,7 @@ package robomap.model.graph;
 
 import java.io.Serializable;
 
-import robomap.model.base.Location;
+import robomap.model.vector.Location;
 
 public class Node implements Serializable {
 	

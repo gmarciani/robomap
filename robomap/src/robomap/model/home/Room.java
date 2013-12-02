@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import robomap.model.base.Dimension;
-import robomap.model.base.Location;
 import robomap.model.object.Object;
+import robomap.model.vector.Dimension;
+import robomap.model.vector.Location;
 
 public class Room implements Serializable {
 
@@ -77,6 +77,12 @@ public class Room implements Serializable {
 				this.getDimension().toString() + ";" + 
 				this.getLocation().toString() + ";" + 
 				this.getObjects().toString() + ")";
+	}
+	
+	public Location getMiddleLocation() {
+		int middleX = (this.getLocation().getX() + this.getDimension().getWidth()) / 2;
+		int middleY = (this.getLocation().getY() + this.getDimension().getHeight()) / 2; 
+		return new Location(middleX, middleY);
 	}
 
 }

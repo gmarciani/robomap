@@ -2,7 +2,7 @@ package robomap.model.vector;
 
 import java.io.Serializable;
 
-public class Vector implements Serializable {
+public class Vector implements Serializable, Comparable<Vector> {
 
 	private static final long serialVersionUID = 2467159919118073955L;
 	
@@ -30,14 +30,25 @@ public class Vector implements Serializable {
 		this.y = y;
 	}
 	
-	@Override
-	public String toString() {
-		return "Vector(" + this.getX() + "," + this.getY() + ")";
-	}
-	
 	public double getModule() {
 		return Math.sqrt((Math.pow(this.getX(), 2)) + (Math.pow(this.getY(), 2)));
 	}
+	
+	@Override
+	public int compareTo(Vector vector) {
+		if (this.getX() > vector.getX() && this.getY() > vector.getY()) {
+			return 1;
+		} else if (this.getX() < vector.getX() && this.getY() < vector.getY()) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
+	
+	@Override
+	public String toString() {
+		return "Vector(" + this.getX() + "," + this.getY() + ")";
+	}	
 	
 	public static Vector sum(Vector vectorA, Vector vectorB) {
 		int x = vectorA.getX() + vectorB.getX();
@@ -82,5 +93,7 @@ public class Vector implements Serializable {
 		System.out.println(x + " " + y);
 		return new Vector(x, y);
 	}
+
+	
 
 }
