@@ -14,6 +14,7 @@
   	    <junit.version>4.11</junit.version>
   	    <mysql-connector.version>5.1.26</mysql-connector.version>
   	    <jung.version>2.0.1</jung.version>
+  	    <jansi.version>1.11</jansi.version>
   	    
   	</properties>
   	
@@ -41,27 +42,14 @@
 			<groupId>net.sf.jung</groupId>
 			<artifactId>jung-algorithms</artifactId>
 			<version>${jung.version}</version>
-		</dependency>      
-		
-  		<dependency>
-			<groupId>net.sf.jung</groupId>
-			<artifactId>jung-io</artifactId>
-			<version>${jung.version}</version>
-		</dependency>   
-		
-  		<dependency>
-			<groupId>net.sf.jung</groupId>
-			<artifactId>jung-visualization</artifactId>
-			<version>2.0.1</version>
-		</dependency>
-		
-  		<dependency>
-			<groupId>net.sf.jung</groupId>
-			<artifactId>jung-jai</artifactId>
-			<version>2.0.1</version>
+		</dependency> 
+		     
+		<dependency>
+			<groupId>org.fusesource.jansi</groupId>
+			<artifactId>jansi</artifactId>
+			<version>${jansi.version}</version>
 		</dependency>
             
-	
   		<dependency>
       		<groupId>junit</groupId>
       		<artifactId>junit</artifactId>
