@@ -1,7 +1,7 @@
 package robomap.control;
 
-import robomap.model.base.Location;
-import robomap.model.robot.Movement;
+import robomap.model.vector.Location;
+import robomap.model.vector.Movement;
 
 public class GPSController {
 		

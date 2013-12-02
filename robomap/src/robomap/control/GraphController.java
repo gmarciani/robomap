@@ -9,8 +9,6 @@ import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
-import robomap.model.base.Dimension;
-import robomap.model.base.Location;
 import robomap.model.graph.Arc;
 import robomap.model.graph.Node;
 import robomap.model.graph.Path;
@@ -18,6 +16,8 @@ import robomap.model.home.Home;
 import robomap.model.home.Room;
 import robomap.model.home.Wall;
 import robomap.model.object.Object;
+import robomap.model.vector.Dimension;
+import robomap.model.vector.Location;
 
 public class GraphController {
 	
@@ -45,7 +45,6 @@ public class GraphController {
 				}
 			}
 		}
-		System.out.println(graph.toString());
 		return graph;
 	}
 

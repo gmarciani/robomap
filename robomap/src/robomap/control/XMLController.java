@@ -12,13 +12,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import robomap.model.base.Dimension;
-import robomap.model.base.Location;
 import robomap.model.home.Door;
 import robomap.model.home.Home;
 import robomap.model.home.Room;
 import robomap.model.home.Wall;
 import robomap.model.object.Object;
+import robomap.model.vector.Dimension;
+import robomap.model.vector.Direction;
+import robomap.model.vector.Location;
 
 public class XMLController {
 	
@@ -52,9 +53,16 @@ public class XMLController {
 			int homeHeight = Integer.valueOf(elementHome.getAttribute("height"));
 			home = new Home(homeName, new Dimension(homeWidth, homeHeight));
 			
+			NodeList nodeStartLocation = elementHome.getElementsByTagName("START");
 			NodeList nodesRoom = elementHome.getElementsByTagName("ROOM");
 			NodeList nodesWall = elementHome.getElementsByTagName("WALL");
 			NodeList nodesDoor = elementHome.getElementsByTagName("DOOR");
+			
+			Element elementStartLocation = (Element) nodeStartLocation.item(0);
+			int startLocationX = Integer.valueOf(elementStartLocation.getAttribute("x"));
+			int startLocationY = Integer.valueOf(elementStartLocation.getAttribute("y"));
+			Location startLocation = new Location(startLocationX, startLocationY);
+			home.setStart(startLocation);
 			
 			for (int r = 0; r < nodesRoom.getLength(); r ++) {
 				Element elementRoom = (Element) nodesRoom.item(r);
@@ -74,7 +82,8 @@ public class XMLController {
 					int objectHeight = Integer.valueOf(elementObject.getAttribute("height"));
 					int objectLocationX = Integer.valueOf(elementObject.getAttribute("x"));
 					int objectLocationY = Integer.valueOf(elementObject.getAttribute("y"));
-					Object object = new Object(objectName, new Dimension(objectWidth, objectHeight), new Location(objectLocationX, objectLocationY));
+					Direction orientation = Direction.valueOf(elementObject.getAttribute("orientation"));
+					Object object = new Object(objectName, new Dimension(objectWidth, objectHeight), new Location(objectLocationX, objectLocationY), orientation);
 					room.addObject(object);					
 				}
 				

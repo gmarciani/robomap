@@ -3,106 +3,28 @@ package robomap.control;
 import java.util.ArrayList;
 import java.util.List;
 
-import robomap.model.base.Location;
+import org.fusesource.jansi.Ansi.Color;
+import org.fusesource.jansi.AnsiConsole;
+
 import robomap.model.home.Home;
+import robomap.model.message.InputMessage;
+import robomap.model.message.Message;
+import robomap.model.message.OutputMessage;
 import robomap.model.object.Action;
+import robomap.model.vector.Location;
+import robomap.model.vector.Movement;
 
 public class DisplayController {
-	
-	private interface Message {
-		
-		public int printMessage();
-		
-	}
-	
-	private static class OutputMessage implements Message {
-		
-		private String robotName;
-		private String body;
-		
-		public OutputMessage(String robotName, String body) {
-			this.setRobotName(robotName);
-			this.setBody(body);
-		}
-
-		public String getRobotName() {
-			return this.robotName;
-		}
-
-		private void setRobotName(String robotName) {
-			this.robotName = robotName;
-		}
-
-		public String getBody() {
-			return this.body;
-		}
-
-		private void setBody(String body) {
-			this.body = body;
-		}
-
-		@Override
-		public int printMessage() {
-			System.out.println("[" + this.getRobotName() + "]\t" + this.getBody());		
-			return -1;
-		}
-	}
-	
-	private static class InputMessage implements Message {
-		
-		private String robotName;
-		private String body;
-		private List<String> choices;
-		
-		public InputMessage(String robotName, String body, List<String> choices) {
-			this.setRobotName(robotName);
-			this.setBody(body);
-			this.setChoices(choices);
-		}
-
-		public String getRobotName() {
-			return this.robotName;
-		}
-
-		private void setRobotName(String robotName) {
-			this.robotName = robotName;
-		}
-
-		public String getBody() {
-			return this.body;
-		}
-
-		private void setBody(String body) {
-			this.body = body;
-		}
-		
-		public List<String> getChoices() {
-			return this.choices;
-		}
-
-		private void setChoices(List<String> choices) {
-			this.choices = choices;
-		}
-
-		@Override
-		public int printMessage() {			
-			int selection = -1;
-			
-			while(selection < this.getChoices().size() || selection >= this.getChoices().size()) {		
-				System.out.println("[" + this.getRobotName() + "]\t" + this.getBody());
-				for (String choice : this.getChoices()) {
-					System.out.println(this.getChoices().indexOf(choice) + ") " + choice);
-				}
-				selection = Integer.valueOf(System.console().readLine("Enter choice: "));
-			}
-			return selection;			
-		}		
-	}
 
 	private static DisplayController displayController;
+	
+	private static final Color INPUT_COLOR = Color.BLACK;
+	private static final Color EXEC_COLOR = Color.BLUE;
+	private static final Color MOVE_COLOR = Color.CYAN;
+	private static final Color STATUS_COLOR = Color.GREEN;
 		
 	private DisplayController() {
-		
+		AnsiConsole.systemInstall();
 	}
 	
 	public static DisplayController getInstance() {
@@ -114,38 +36,56 @@ public class DisplayController {
 	
 	private synchronized int write(Message message) {
 		return message.printMessage();
-	}
-
-	public void showImportedHome(String robotName, Home home) {
-		String body = "IMPORTED HOME " + home.getName();
-		Message message = new OutputMessage(robotName, body);
-		this.write(message);
 	}	
 	
-	public int selectHome(String robotName, List<Home> homes) {
-		String body = "Select a home:";
+	public int showSelectHome(String robotName, List<Home> homes) {
+		String body = "SELECT A HOME:";
 		List<String> choices = new ArrayList<String>();
 		for (Home home : homes) {
 			choices.add(home.getName());
 		}
-		Message message = new InputMessage(robotName, body, choices);
+		Message message = new InputMessage(robotName, body, choices, INPUT_COLOR);
 		return this.write(message);
 	}	
 	
-	public int selectAction(String robotName, List<Action> actions) {
-		String body = "Select an action:";
+	public int showSelectAction(String robotName, List<Action> actions) {
+		String body = "SELECT AN ACTION:";
 		List<String> choices = new ArrayList<String>();
 		for (Action action : actions) {
 			choices.add(action.getName());
 		}
-		Message message = new InputMessage(robotName, body, choices);
+		Message message = new InputMessage(robotName, body, choices, INPUT_COLOR);
 		return this.write(message);
 	}
 
-	public void showCurrentStatus(String robotName, Home currentHome, Location currentLocation) {
-		String body = "Status: Home: " + currentHome.getName() + ", Location: (" + currentLocation.getX() + "; " + currentLocation.getY() + ")";
-		Message message = new OutputMessage(robotName, body);
-		this.write(message);		
+	public void showStatus(String robotName, Home currentHome, Location currentLocation) {
+		String body = "STATUS HOME " + currentHome.getName() + " " + "IN (" + currentLocation.getX() + ";" + currentLocation.getY() + ") ";
+		Message message = new OutputMessage(robotName, body, STATUS_COLOR);
+		this.write(message);	
 	}	
+	
+	public void showCommandImport(String robotName, String path) {
+		String body = "EXEC IMPORT HOME " + path;
+		Message message = new OutputMessage(robotName, body, EXEC_COLOR);
+		this.write(message);
+	}
+	
+	public void showCommandSetHome(String robotName, Home home) {
+		String body = "EXEC SET HOME " + home.getName();
+		Message message = new OutputMessage(robotName, body, EXEC_COLOR);
+		this.write(message);
+	}
+	
+	public void showCommadComputePathPlan(String robotName, Home home, Location source, Location destination) {
+		String body = "EXEC COMPUTE PATHPLAN FOR HOME " + home.getName() + " FROM (" + source.getX() + ";" + source.getY() + ") TO (" + destination.getX() + ";" + destination.getY() + ")";
+		Message message = new OutputMessage(robotName, body, EXEC_COLOR);
+		this.write(message);
+	}
+
+	public void showCommandMovement(String robotName, Home home, Location prevLocation, Location nextLocation, Movement movement) {
+		String body = "EXEC MOVE " + movement.getModule() + " " + movement.getDirection().getName() + " IN " + home.getName() + " FROM (" + prevLocation.getX() + ";" + prevLocation.getY() + ") TO (" + nextLocation.getX() +";" + nextLocation.getY() + ")" ;
+		Message message = new OutputMessage(robotName, body, MOVE_COLOR);
+		this.write(message);
+	}
 
 }
