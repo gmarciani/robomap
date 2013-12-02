@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE PLANIMETRY SYSTEM "../src/robomap/xml/planimetry.dtd" >
+
+<PLANIMETRY>
+    
+  	<HOME name="sweet_home" width="10" height="10">
+      
+		<START x="0" y="0"/>
+      
+    	<ROOM name="room1" width="5" height="5" x="0" y="0">
+    		<OBJECT name="table1" width="2" height="2" x="1" y="2"/>
+    	</ROOM>
+    	
+    	<ROOM name="room2" width="5" height="5" x="5" y="0">
+        	<OBJECT name="table2" width="2" height="2" x="6" y="2"/>
+    	</ROOM>
+    	
+    	<ROOM name="room3" width="5" height="5" x="0" y="5">
+        	<OBJECT name="table3" width="1" height="1" x="2" y="7"/>
+    	</ROOM>
+    	
+    	<ROOM name="room4" width="2" height="5" x="5" y="5"/>
+    	
+    	<ROOM name="room5" width="3" height="5" x="7" y="5">
+        	<OBJECT name="table5" width="1" height="2" x="7" y="7"/>
+    	</ROOM>
+    
+    	<WALL width="2" x="0" y="5"/>
+    	<WALL width="3" x="3" y="5"/>
+    	<WALL width="1" x="7" y="5"/>
+    	<WALL width="1" x="9" y="5"/>
+    	<WALL height="1" x="5" y="0"/>
+    	<WALL height="4" x="5" y="2"/>
+    	<WALL height="3" x="5" y="7"/> 
+    	<WALL height="1" x="7" y="5"/>   
+    	<WALL height="3" x="7" y="7"/>   
+    
+    	<DOOR width="1" x="2" y="5"/>  
+    	<DOOR width="1" x="6" y="5"/>  
+    	<DOOR width="1" x="8" y="5"/>  
+    	<DOOR height="1" x="5" y="1"/>  
+    	<DOOR height="1" x="5" y="6"/>
+    	<DOOR height="1" x="7" y="6"/>
+    
+  	</HOME>
+  
+</PLANIMETRY>
