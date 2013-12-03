@@ -21,20 +21,11 @@ import robomap.model.vector.Location;
 
 public class GraphController {
 	
-	private static GraphController graphController;
-	
 	private GraphController() {}
-	
-	public static GraphController getInstance() {
-		if(graphController == null) {
-			graphController = new GraphController();
-		}
-		return graphController;
-	}
 
-	public DirectedGraph<Node, Arc> parseGraph(Home home) {
+	public static DirectedGraph<Node, Arc> parseGraph(Home home) {
 		DirectedGraph<Node, Arc> graph = new DirectedSparseGraph<Node, Arc>();
-		Arc arcTable[][][] = this.getArcTable(home);		
+		Arc arcTable[][][] = getArcTable(home);		
 		Dimension homeDimension = home.getDimension();
 		int homeWidth = homeDimension.getWidth();
 		int homeHeight = homeDimension.getHeight();
@@ -47,8 +38,14 @@ public class GraphController {
 		}
 		return graph;
 	}
+	
+	public static Path computePath(Home home, Location source, Location destination) {
+		DirectedGraph<Node, Arc> graph = parseGraph(home);
+		Path path = computePath(graph, source, destination);
+		return path;
+	}
 
-	private Arc[][][] getArcTable(Home home) {
+	private static Arc[][][] getArcTable(Home home) {
 		Dimension homeDimension = home.getDimension();
 		int homeWidth = homeDimension.getWidth();
 		int homeHeight = homeDimension.getHeight();
@@ -61,8 +58,8 @@ public class GraphController {
 					for (int yad = y - 1; yad <= y + 1; yad ++) {
 						if ((xad == x && yad == y) || 
 								xad < 0 || xad >= homeWidth || yad < 0 || yad >= homeHeight
-								|| this.blockedByWall(home, x, y, xad, yad)
-								|| this.isObject(home, x, y)) continue;
+								|| blockedByWall(home, x, y, xad, yad)
+								|| isObject(home, x, y)) continue;
 						Node destination = new Node(new Location(xad, yad));
 						float cost = (xad != x && yad != y) ? (float) Math.sqrt(2) : 1;
 						listArc.add(new Arc(source, destination, cost));
@@ -74,7 +71,7 @@ public class GraphController {
 		return table;
 	}
 
-	private boolean blockedByWall(Home home, int x, int y, int xad, int yad) {
+	private static boolean blockedByWall(Home home, int x, int y, int xad, int yad) {
 		List<Wall> walls = home.getWalls();
 		for (Wall wall : walls) {
 			Location wallLocation = wall.getLocation();
@@ -108,7 +105,7 @@ public class GraphController {
 		return false;
 	}
 	
-	private boolean isObject(Home home, int x, int y) {
+	private static boolean isObject(Home home, int x, int y) {
 		List<Object> objects = new ArrayList<Object>();
 		for (Room room : home.getRooms()) {
 			objects.addAll(room.getObjects());
@@ -129,7 +126,7 @@ public class GraphController {
 		return false;
 	}
 
-	private Path computePath(DirectedGraph<Node, Arc> graph, Location source, Location destination) {
+	private static Path computePath(DirectedGraph<Node, Arc> graph, Location source, Location destination) {
 		Transformer<Arc, Float> transformer = new Transformer<Arc, Float>() {
 			public Float transform(Arc arc) {
 				return arc.getWeight();
@@ -140,10 +137,6 @@ public class GraphController {
 		return new Path(listArc);
 	}
 	
-	public Path computePath(Home home, Location source, Location destination) {
-		DirectedGraph<Node, Arc> graph = this.parseGraph(home);
-		Path path = this.computePath(graph, source, destination);
-		return path;
-	}
+	
 	
 }

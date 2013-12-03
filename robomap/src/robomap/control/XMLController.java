@@ -23,21 +23,9 @@ import robomap.model.vector.Location;
 
 public class XMLController {
 	
-	private static XMLController xmlController = null;
-	private static DocumentBuilderFactory documentBuilderFactory;
-	
-	private XMLController() {
-		documentBuilderFactory = DocumentBuilderFactory.newInstance();
-	}
-	
-	public static XMLController getInstance() {
-		if(xmlController == null) {
-			xmlController = new XMLController();
-		}
-		return xmlController;
-	}
-	
-	public Home parsePlanimetry(String path) throws ParserConfigurationException, SAXException, IOException {
+	private static DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+		
+	public static Home parsePlanimetry(String path) throws ParserConfigurationException, SAXException, IOException {
 		File file = new File(path);
 		Home home = null;
 		

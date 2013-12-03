@@ -31,8 +31,8 @@ import robomap.model.vector.Movement;
 
 public class RobotController {	
 	
-	private XMLController xmlController;
-	private GraphController graphController;
+	private static final boolean D = false;
+	
 	private DisplayController displayController;
 	private GPSController gpsController;
 	private MotorController motorController;
@@ -53,8 +53,6 @@ public class RobotController {
 		this.gpsController = new GPSController();
 		this.motorController = new MotorController(this.gpsController);
 		this.displayController = DisplayController.getInstance();
-		this.xmlController = XMLController.getInstance();
-		this.graphController = GraphController.getInstance();
 		this.homeDAO = HomeJDBCDAO.getInstance();
 		this.roomDAO = RoomJDBCDAO.getInstance();
 		this.wallDAO = WallJDBCDAO.getInstance();
@@ -64,22 +62,27 @@ public class RobotController {
 	}
 	
 	public String getRobotName() {
+		if(D) System.out.println("#ROBOTCONTROLLER getRobotName");
 		return this.robotName;
 	}
 
 	public void setRobotName(String robotName) {
+		if(D) System.out.println("#ROBOTCONTROLLER setRobotName");
 		this.robotName = robotName;
 	}
 	
 	public Object getPayload() {
+		if(D) System.out.println("#ROBOTCONTROLLER getPayload");
 		return this.payload;
 	}
 
 	public void setPayload(Object payload) {
+		if(D) System.out.println("#ROBOTCONTROLLER setPayload");
 		this.payload = payload;
 	}
 	
 	private void move(Movement movement) {
+		if(D) System.out.println("#ROBOTCONTROLLER move");
 		Location prevLocation = this.gpsController.getLocation();
 		Location nextLocation = Location.computeLocation(prevLocation, movement);
 		this.displayController.showCommandMovement(this.getRobotName(), this.getCurrentHome(), prevLocation, nextLocation, movement);
@@ -87,6 +90,7 @@ public class RobotController {
 	}
 	
 	public void move(MovementPlan movementPlan) {
+		if(D) System.out.println("#ROBOTCONTROLLER move");
 		this.displayController.showStatus(this.getRobotName(), this.getCurrentHome(), this.gpsController.getLocation());
 		Location destination = movementPlan.getDestination();
 		while (!this.gpsController.getLocation().equals(destination)) {
@@ -104,20 +108,23 @@ public class RobotController {
 	}
 	
 	private void lockLocation(Location location) {
+		if(D) System.out.println("#ROBOTCONTROLLER lockLocation");
 		while(this.locationDAO.isLocked(this.getCurrentHome(), location)) {}
 		this.locationDAO.lock(this.getCurrentHome(), location);
 		
 	}
 
 	private void unlockLocation(Location location) {
+		if(D) System.out.println("#ROBOTCONTROLLER unlockLocation");
 		this.locationDAO.unlock(this.getCurrentHome(), location);
 	}
 
 	public Home importHomeFromXML(String path) {
+		if(D) System.out.println("#ROBOTCONTROLLER importHomeFromXML");
 		this.displayController.showCommandImport(this.getRobotName(), path);
 		Home home = null;
 		try {
-			home = this.xmlController.parsePlanimetry(path);
+			home = XMLController.parsePlanimetry(path);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			Log.printXMLException("RobotController", "ImportHomeFromXML", e);
 		}
@@ -127,6 +134,7 @@ public class RobotController {
 	}
 	
 	public void selectHome() {
+		if(D) System.out.println("#ROBOTCONTROLLER selectHome");
 		List<Home> allHomes = this.homeDAO.getAll();
 		int choice = this.displayController.showSelectHome(this.getRobotName(), allHomes);
 		Home selectedHome = allHomes.get(choice);
@@ -134,10 +142,12 @@ public class RobotController {
 	}
 	
 	public Home getCurrentHome() {
+		if(D) System.out.println("#ROBOTCONTROLLER getCurrentHome");
 		return this.currentHome;
 	}
 
 	public void setCurrentHome(Home home) {
+		if(D) System.out.println("#ROBOTCONTROLLER setCurrentHome");
 		this.displayController.showCommandSetHome(this.getRobotName(), home);
 		this.currentHome = home;
 		this.gpsController.setLocation(home.getStart());
@@ -145,36 +155,43 @@ public class RobotController {
 	}
 
 	public Location getStartLocation() {
+		if(D) System.out.println("#ROBOTCONTROLLER getStartLocation");
 		Home home = this.getCurrentHome();
 		Location startLocation = home.getStart();
 		return startLocation;
 	}
 
 	public MovementPlan getMovementPlanTo(Location destination) {
+		if(D) System.out.println("#ROBOTCONTROLLER getMovementPlanTo");
 		Location source = this.gpsController.getLocation();
 		this.displayController.showCommadComputePathPlan(this.getRobotName(), this.getCurrentHome(), source, destination);
-		Path path = this.graphController.computePath(this.getCurrentHome(), source, destination);
+		Path path = GraphController.computePath(this.getCurrentHome(), source, destination);
 		MovementPlan movementPlan = MovementPlan.computeMovementPlan(path);
 		return movementPlan;
 	}
 
 	public Location getRoomLocation(String roomName) {
+		if(D) System.out.println("#ROBOTCONTROLLER getRoomLocation");
 		return this.roomDAO.getLocation(this.getCurrentHome().getName(), roomName);
 	}
 	
 	public Object getObject(String roomName, String objectName) {
+		if(D) System.out.println("#ROBOTCONTROLLER getObject");
 		return this.objectDAO.getObject(this.getCurrentHome().getName(), roomName, objectName);
 	}
 
 	public Location getObjectLocation(String roomName, String objectName) {
+		if(D) System.out.println("#ROBOTCONTROLLER getObjectLocation");
 		return this.objectDAO.getLocation(this.getCurrentHome().getName(), roomName, objectName);
 	}
 	
 	public Location getObjectLocation(String roomName, String objectName, Action action) {
+		if(D) System.out.println("#ROBOTCONTROLLER getObjectLocation");
 		return this.objectDAO.getLocation(this.getCurrentHome().getName(), roomName, objectName, action);
 	}
 
 	public Location getObjectLocation(String roomName, String objectName, Direction direction) {
+		if(D) System.out.println("#ROBOTCONTROLLER getObjectLocation");
 		Object object = this.objectDAO.getObject(this.getCurrentHome().getName(), roomName, objectName);
 		Location location = object.getMiddleLocation();
 		Location prevLocation = location;
@@ -190,26 +207,32 @@ public class RobotController {
 	}	
 
 	public void setObjectOrientation(String roomName, String objectName, Direction orientation) {
+		if(D) System.out.println("#ROBOTCONTROLLER setObjectOrientation");
 		this.objectDAO.setOrientation(this.getCurrentHome().getName(), roomName, objectName, orientation);
 	}
 
 	private boolean isValidLocation(Location location) {
+		if(D) System.out.println("#ROBOTCONTROLLER isValidLocation");
 		return this.getCurrentHome().comprehend(location);
 	}
 
 	private boolean isThereObject(Location location) {
+		if(D) System.out.println("#ROBOTCONTROLLER isThereObject");
 		return this.objectDAO.isThereAny(location);
 	}
 
 	private boolean isThereWall(Location locationA, Location locationB) {
+		if(D) System.out.println("#ROBOTCONTROLLER isThereWall");
 		return this.wallDAO.isThereAny(locationA, locationB);
 	}
 
 	public List<String> getAvailableActions(Object object) {
+		if(D) System.out.println("#ROBOTCONTROLLER getAvailableActions");
 		return this.objectDAO.getActions(object);
 	}
 	
 	public Action selectAction(Object object) {
+		if(D) System.out.println("#ROBOTCONTROLLER selectAction");
 		List<Action> actions = this.actionDAO.getActions(object);
 		int choice = this.displayController.showSelectAction(this.getRobotName(), actions);
 		Action action = actions.get(choice);
@@ -217,6 +240,7 @@ public class RobotController {
 	}
 	
 	public void doAction(Object object, Action action) {
+		if(D) System.out.println("#ROBOTCONTROLLER doAction");
 		if (this.gpsController.getLocation().equals(this.objectDAO.getLocation(object, action))) {
 			this.motorController.doAction(action);
 			this.objectDAO.setStatus(object, action.getStatus());
@@ -224,18 +248,21 @@ public class RobotController {
 	}	
 
 	public void addPayload(Object object) {
+		if(D) System.out.println("#ROBOTCONTROLLER addPayload");
 		this.setPayload(object);		
 	}
 
 	public void releasePayload() {
+		if(D) System.out.println("#ROBOTCONTROLLER releasePayload");
 		Object object = this.getPayload();
 		Location location = this.gpsController.getLocation();
 		this.objectDAO.setLocation(object, location);
 		this.setPayload(null);		
 	}
 
-	public void printStatus() {
-		this.displayController.showStatus(this.getRobotName(), this.getCurrentHome(), this.gpsController.getLocation());
+	public void shutDown() {
+		if(D) System.out.println("#ROBOTCONTROLLER releasePayload");
+		this.displayController.showCommandShutDown(this.getRobotName());		
 	}
 
 }

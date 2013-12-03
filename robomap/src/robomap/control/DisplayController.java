@@ -33,7 +33,7 @@ public class DisplayController {
 		}
 		return displayController;
 	}
-	
+
 	private synchronized int write(Message message) {
 		return message.printMessage();
 	}	
@@ -85,6 +85,12 @@ public class DisplayController {
 	public void showCommandMovement(String robotName, Home home, Location prevLocation, Location nextLocation, Movement movement) {
 		String body = "EXEC MOVE " + movement.getModule() + " " + movement.getDirection().getName() + " IN " + home.getName() + " FROM (" + prevLocation.getX() + ";" + prevLocation.getY() + ") TO (" + nextLocation.getX() +";" + nextLocation.getY() + ")" ;
 		Message message = new OutputMessage(robotName, body, MOVE_COLOR);
+		this.write(message);
+	}
+
+	public void showCommandShutDown(String robotName) {
+		String body = "EXEC SHUTDOWN" ;
+		Message message = new OutputMessage(robotName, body, EXEC_COLOR);
 		this.write(message);
 	}
 

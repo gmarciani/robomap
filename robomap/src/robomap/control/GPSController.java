@@ -7,9 +7,7 @@ public class GPSController {
 		
 	private Location location;
 	
-	public GPSController() {
-
-	}	
+	public GPSController() {}	
 
 	public Location getLocation() {
 		return this.location;
