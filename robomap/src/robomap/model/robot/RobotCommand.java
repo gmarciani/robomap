@@ -6,7 +6,7 @@ import robomap.model.vector.Location;
 
 public class RobotCommand {
 	
-	private Opcode opcode;
+	private RobotOpcode opcode;
 	private String filePath;
 	private String robotName;
 	private String homeName;
@@ -19,14 +19,14 @@ public class RobotCommand {
 	private Action action;
 	
 	public RobotCommand() {
-		this.setOpcode(Opcode.NULL);
+		this.setOpcode(RobotOpcode.NULL);
 	}
 
-	public Opcode getOpcode() {
+	public RobotOpcode getOpcode() {
 		return this.opcode;
 	}
 
-	public RobotCommand setOpcode(Opcode opcode) {
+	public RobotCommand setOpcode(RobotOpcode opcode) {
 		this.opcode = opcode;
 		return this;
 	}

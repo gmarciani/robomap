@@ -137,7 +137,7 @@ public class Robot extends Thread {
 	public void importHomeFromXML(String xmlFilePath) {
 		if(D) System.out.println("importHomeFromXML");
 		RobotCommand command = new RobotCommand()
-		.setOpcode(Opcode.IMPORT)
+		.setOpcode(RobotOpcode.IMPORT)
 		.setFilePath(xmlFilePath);
 		this.getCommands().add(command);
 	}	
@@ -145,7 +145,7 @@ public class Robot extends Thread {
 	public void goTo(Location destination) {
 		if(D) System.out.println("goToLocation");
 		RobotCommand command = new RobotCommand()
-		.setOpcode(Opcode.GOTO_LOCATION)
+		.setOpcode(RobotOpcode.GOTO_LOCATION)
 		.setLocation(destination);
 		this.getCommands().add(command);
 	}
@@ -153,14 +153,14 @@ public class Robot extends Thread {
 	public void goToStart() {
 		if(D) System.out.println("goToStart");
 		RobotCommand command = new RobotCommand()
-		.setOpcode(Opcode.GOTO_START);
+		.setOpcode(RobotOpcode.GOTO_START);
 		this.getCommands().add(command);
 	}
 
 	public void goTo(String roomName) {
 		if(D) System.out.println("goToRoom");
 		RobotCommand command = new RobotCommand()
-		.setOpcode(Opcode.GOTO_ROOM)
+		.setOpcode(RobotOpcode.GOTO_ROOM)
 		.setRoomName(roomName);
 		this.getCommands().add(command);
 	}
@@ -168,7 +168,7 @@ public class Robot extends Thread {
 	public void goTo(String roomName, String objectName) {
 		if(D) System.out.println("goToObject");
 		RobotCommand command = new RobotCommand()
-		.setOpcode(Opcode.GOTO_OBJECT)
+		.setOpcode(RobotOpcode.GOTO_OBJECT)
 		.setRoomName(roomName)
 		.setObjectName(objectName);
 		this.getCommands().add(command);
@@ -177,7 +177,7 @@ public class Robot extends Thread {
 	public void goTo(String roomName, String objectName, Direction direction) {
 		if(D) System.out.println("goToObjectDirection");
 		RobotCommand command = new RobotCommand()
-		.setOpcode(Opcode.GOTO_OBJECT_DIRECTION)
+		.setOpcode(RobotOpcode.GOTO_OBJECT_DIRECTION)
 		.setRoomName(roomName)
 		.setObjectName(objectName)
 		.setRelativePositition(direction);
@@ -187,7 +187,7 @@ public class Robot extends Thread {
 	public void moveObject(String roomName, String objectName, Location destination, Direction orientation) {
 		if(D) System.out.println("moveObject");
 		RobotCommand command = new RobotCommand()
-		.setOpcode(Opcode.MOVE_OBJECT)
+		.setOpcode(RobotOpcode.MOVE_OBJECT)
 		.setRoomName(roomName)
 		.setObjectName(objectName)
 		.setLocation(destination)
@@ -198,7 +198,7 @@ public class Robot extends Thread {
 	public void makeActionOn(String roomName, String objectName, Action action) {
 		if(D) System.out.println("makeActionOn");
 		RobotCommand command = new RobotCommand()
-		.setOpcode(Opcode.MAKE_ACTION)
+		.setOpcode(RobotOpcode.MAKE_ACTION)
 		.setRoomName(roomName)
 		.setObjectName(objectName)
 		.setAction(action);
@@ -208,7 +208,7 @@ public class Robot extends Thread {
 	public void shutDown() {
 		if(D) System.out.println("shutDown");
 		RobotCommand command = new RobotCommand()
-		.setOpcode(Opcode.SHUT_DOWN);
+		.setOpcode(RobotOpcode.SHUT_DOWN);
 		this.getCommands().add(command);
 	}	
 

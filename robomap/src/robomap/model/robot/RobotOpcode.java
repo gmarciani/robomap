@@ -1,6 +1,6 @@
 package robomap.model.robot;
 
-public enum Opcode {
+public enum RobotOpcode {
 	
 	IMPORT,
 	GOTO_START,
@@ -13,6 +13,6 @@ public enum Opcode {
 	SHUT_DOWN,
 	NULL;
 	
-	private Opcode() {}
+	private RobotOpcode() {}
 
 }

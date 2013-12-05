@@ -4,14 +4,14 @@ import java.io.Serializable;
 
 public enum Direction implements Serializable {
 	
-	FORWARD("Forward", new Vector(0, 1), 0),
-	BACK("Back", new Vector(0, -1), 180),
-	LEFT("Left", new Vector(-1, 0), 90),
-	RIGHT("Right", new Vector(1, 0), -90),
-	DIAGONAL_TOP_LEFT("DiagonalTopLeft", new Vector(-1, 1), 45),
-	DIAGONAL_TOP_RIGHT("DiagonalTopRight", new Vector(1, 1), -45),
-	DIAGONAL_BOTTOM_LEFT("DiagonalBottomLeft", new Vector(-1, -1), 135),
-	DIAGONAL_BOTTOM_RIGHT("DiagonalBottomRight", new Vector(1, -1), -135),
+	FORWARD("FORWRAD", new Vector(0, 1), 0),
+	BACKWARD("BACKWARD", new Vector(0, -1), 180),
+	LEFT("LEFT", new Vector(-1, 0), 90),
+	RIGHT("RIGHT", new Vector(1, 0), -90),
+	DIAGONAL_TOP_LEFT("DIAGONALTOPLEFT", new Vector(-1, 1), 45),
+	DIAGONAL_TOP_RIGHT("DIAGONALTOPRIGHT", new Vector(1, 1), -45),
+	DIAGONAL_BOTTOM_LEFT("DIAGONALBOTTOMLEFT", new Vector(-1, -1), 135),
+	DIAGONAL_BOTTOM_RIGHT("DIAGONALBOTTOMRIGHT", new Vector(1, -1), -135),
 	NONE("None", new Vector(0, 0), 0);
 	
 	private final String name;
@@ -63,7 +63,7 @@ public enum Direction implements Serializable {
 			if(destinationY > sourceY) {
 				return Direction.FORWARD;
 			} else if(destinationY < sourceY) {
-				return Direction.BACK;
+				return Direction.BACKWARD;
 			} else {
 				return Direction.NONE;
 			}

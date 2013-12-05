@@ -2,27 +2,22 @@ package robomap.model.home;
 
 import java.io.Serializable;
 
-import robomap.model.vector.Dimension;
+import robomap.model.vector.Direction;
 import robomap.model.vector.Location;
 
 public class Door implements Serializable {
 	
-	private static final long serialVersionUID = -3076339254360310436L;
+	private static final long serialVersionUID = -3076339254360310436L;	
 	
-	private Dimension dimension;
 	private Location location;	
+	private Direction direction;
+	private int lenght;
 	
-	public Door(Dimension dimension, Location location) {
+	public Door(Location location, Direction direction, int lenght) {
 		this.setLocation(location);
-		this.setDimension(dimension);
-	}
-	
-	public Dimension getDimension() {
-		return this.dimension;
-	}
-
-	public void setDimension(Dimension dimension) {
-		this.dimension = dimension;
+		this.setDirection(direction);
+		this.setLenght(lenght);
+		
 	}
 
 	public Location getLocation() {
@@ -32,12 +27,29 @@ public class Door implements Serializable {
 	public void setLocation(Location location) {
 		this.location = location;
 	}
+
+	public Direction getDirection() {
+		return this.direction;
+	}
+
+	public void setDirection(Direction direction) {
+		this.direction = direction;
+	}
+
+	public int getLenght() {
+		return this.lenght;
+	}
+
+	public void setLenght(int lenght) {
+		this.lenght = lenght;
+	}
 	
 	@Override
 	public String toString() {
 		return "Door(" + 
-				this.getDimension().toString() + ";" + 
-				this.getLocation().toString() + ")";
+				this.getLocation() + ", " + 
+				this.getDirection() + ", " + 
+				this.getLenght() + ")";
 	}
 
 }

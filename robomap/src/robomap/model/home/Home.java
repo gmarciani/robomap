@@ -34,6 +34,12 @@ public class Home implements Serializable {
 		this.setRooms(rooms);
 	}
 	
+	public Home(String name, Dimension dimension, Location start) {
+		this.setName(name);
+		this.setDimension(dimension);
+		this.setStart(start);
+	}
+	
 	public Home(String name, Dimension dimension) {
 		this.setName(name);
 		this.setDimension(dimension);

@@ -56,7 +56,7 @@ public class OutputMessage implements Message {
 	@Override
 	public int printMessage() {
 		String message = this.getHeader() + "\t" + this.getBody();
-		System.out.println(ansi().fg(this.getForeground()).a(message));		
+		System.out.println(ansi().fg(this.getForeground()).a(message).reset());		
 		return -1;
 	}
 	
