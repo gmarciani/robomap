@@ -39,18 +39,13 @@ public class XMLController {
 			String homeName = elementHome.getAttribute("name");
 			int homeWidth = Integer.valueOf(elementHome.getAttribute("width"));
 			int homeHeight = Integer.valueOf(elementHome.getAttribute("height"));
-			home = new Home(homeName, new Dimension(homeWidth, homeHeight));
+			int homeStartX = Integer.valueOf(elementHome.getAttribute("startx"));
+			int homeStartY = Integer.valueOf(elementHome.getAttribute("starty"));
+			home = new Home(homeName, new Dimension(homeWidth, homeHeight), new Location(homeStartX, homeStartY));
 			
-			NodeList nodeStartLocation = elementHome.getElementsByTagName("START");
 			NodeList nodesRoom = elementHome.getElementsByTagName("ROOM");
 			NodeList nodesWall = elementHome.getElementsByTagName("WALL");
 			NodeList nodesDoor = elementHome.getElementsByTagName("DOOR");
-			
-			Element elementStartLocation = (Element) nodeStartLocation.item(0);
-			int startLocationX = Integer.valueOf(elementStartLocation.getAttribute("x"));
-			int startLocationY = Integer.valueOf(elementStartLocation.getAttribute("y"));
-			Location startLocation = new Location(startLocationX, startLocationY);
-			home.setStart(startLocation);
 			
 			for (int r = 0; r < nodesRoom.getLength(); r ++) {
 				Element elementRoom = (Element) nodesRoom.item(r);
@@ -70,8 +65,8 @@ public class XMLController {
 					int objectHeight = Integer.valueOf(elementObject.getAttribute("height"));
 					int objectLocationX = Integer.valueOf(elementObject.getAttribute("x"));
 					int objectLocationY = Integer.valueOf(elementObject.getAttribute("y"));
-					Direction orientation = Direction.valueOf(elementObject.getAttribute("orientation"));
-					Object object = new Object(objectName, new Dimension(objectWidth, objectHeight), new Location(objectLocationX, objectLocationY), orientation);
+					Direction objectOrientation = Direction.valueOf(elementObject.getAttribute("orientation"));
+					Object object = new Object(objectName, new Dimension(objectWidth, objectHeight), new Location(objectLocationX, objectLocationY), objectOrientation);
 					room.addObject(object);					
 				}
 				
@@ -80,21 +75,21 @@ public class XMLController {
 			
 			for (int w = 0; w < nodesWall.getLength(); w ++) {
 				Element elementWall = (Element) nodesWall.item(w);
-				int wallWidth = Integer.valueOf(elementWall.getAttribute("width"));
-				int wallHeight = Integer.valueOf(elementWall.getAttribute("height"));
+				int wallLenght = Integer.valueOf(elementWall.getAttribute("lenght"));
+				Direction wallOrientation = Direction.valueOf(elementWall.getAttribute("orientation"));
 				int wallLocationX = Integer.valueOf(elementWall.getAttribute("x"));
 				int wallLocationY = Integer.valueOf(elementWall.getAttribute("y"));
-				Wall wall = new Wall(new Dimension(wallWidth, wallHeight), new Location(wallLocationX, wallLocationY));
+				Wall wall = new Wall(new Location(wallLocationX, wallLocationY), wallOrientation, wallLenght);
 				home.addWall(wall);				
 			}
 			
 			for (int d = 0; d < nodesDoor.getLength(); d ++) {
 				Element elementDoor = (Element) nodesDoor.item(d);
-				int doorWidth = Integer.valueOf(elementDoor.getAttribute("width"));
-				int doorHeight = Integer.valueOf(elementDoor.getAttribute("height"));
+				int doorLenght = Integer.valueOf(elementDoor.getAttribute("lenght"));
+				Direction doorOrientation = Direction.valueOf(elementDoor.getAttribute("orientation"));
 				int doorLocationX = Integer.valueOf(elementDoor.getAttribute("x"));
 				int doorLocationY = Integer.valueOf(elementDoor.getAttribute("y"));
-				Door door = new Door(new Dimension(doorWidth, doorHeight), new Location(doorLocationX, doorLocationY));
+				Door door = new Door(new Location(doorLocationX, doorLocationY), doorOrientation, doorLenght);
 				home.addDoor(door);				
 			}
 		}

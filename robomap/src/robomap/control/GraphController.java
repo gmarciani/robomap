@@ -17,6 +17,7 @@ import robomap.model.home.Room;
 import robomap.model.home.Wall;
 import robomap.model.object.Object;
 import robomap.model.vector.Dimension;
+import robomap.model.vector.Direction;
 import robomap.model.vector.Location;
 
 public class GraphController {
@@ -75,32 +76,34 @@ public class GraphController {
 		List<Wall> walls = home.getWalls();
 		for (Wall wall : walls) {
 			Location wallLocation = wall.getLocation();
-			Dimension wallDimension = wall.getDimension();
+			Direction wallDirection = wall.getDirection();
+			int wallLenght = wall.getLenght();
 			int wallX = wallLocation.getX();
-			int wallY = wallLocation.getY();							
-			int wallW = wallDimension.getWidth();
-			int wallH = wallDimension.getHeight();
-			for (int wx = wallX; wx < wallX + wallW; wx ++) {
-				if ((x == wx && y == wallY - 1 && yad == wallY && (xad == x || xad == x - 1 || xad == x + 1)) 
-						|| (x == wx + 1) && y == wallY - 1 && yad == wallY && xad == wx 
-						|| (x == wx - 1) && y == wallY - 1 && yad == wallY && xad == wx
-						|| (x == wx && y == wallY && yad == wallY - 1 && (xad == x || xad == x - 1 || xad == x + 1))
-						|| (x == wx + 1) && y == wallY && yad == wallY - 1 && xad == wx 
-						|| (x == wx - 1) && y == wallY && yad == wallY - 1 && xad == wx) {
-					return true;
-				}
-			}
+			int wallY = wallLocation.getY();	
 			
-			for (int wy = wallY; wy < wallY + wallH; wy ++) {
-				if ((y == wy && x == wallX - 1 && xad == wallX && (yad == y || yad == y - 1 || yad == y + 1)) 
-						|| (y == wy + 1) && x == wallX - 1 && xad == wallX && yad == wy 
-						|| (y == wy - 1) && x == wallX - 1 && xad == wallX && yad == wy
-						|| (y == wy && x == wallX && xad == wallX - 1 && (yad == y || yad == y - 1 || yad == y + 1))
-						|| (y == wy + 1) && x == wallX && xad == wallX - 1 && yad == wy 
-						|| (y == wy - 1) && x == wallX && xad == wallX - 1 && yad == wy) {
-					return true;
+			if (wallDirection == Direction.RIGHT) {
+				for (int wx = wallX; wx < wallX + wallLenght; wx ++) {
+					if ((x == wx && y == wallY - 1 && yad == wallY && (xad == x || xad == x - 1 || xad == x + 1)) 
+							|| (x == wx + 1) && y == wallY - 1 && yad == wallY && xad == wx 
+							|| (x == wx - 1) && y == wallY - 1 && yad == wallY && xad == wx
+							|| (x == wx && y == wallY && yad == wallY - 1 && (xad == x || xad == x - 1 || xad == x + 1))
+							|| (x == wx + 1) && y == wallY && yad == wallY - 1 && xad == wx 
+							|| (x == wx - 1) && y == wallY && yad == wallY - 1 && xad == wx) {
+						return true;
+					}
 				}
-			}
+			} else if (wallDirection == Direction.FORWARD) {
+				for (int wy = wallY; wy < wallY + wallLenght; wy ++) {
+					if ((y == wy && x == wallX - 1 && xad == wallX && (yad == y || yad == y - 1 || yad == y + 1)) 
+							|| (y == wy + 1) && x == wallX - 1 && xad == wallX && yad == wy 
+							|| (y == wy - 1) && x == wallX - 1 && xad == wallX && yad == wy
+							|| (y == wy && x == wallX && xad == wallX - 1 && (yad == y || yad == y - 1 || yad == y + 1))
+							|| (y == wy + 1) && x == wallX && xad == wallX - 1 && yad == wy 
+							|| (y == wy - 1) && x == wallX && xad == wallX - 1 && yad == wy) {
+						return true;
+					}
+				}
+			}			
 		}
 		return false;
 	}

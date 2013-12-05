@@ -81,6 +81,21 @@ public class RobotController {
 		this.payload = payload;
 	}
 	
+	public Home importHomeFromXML(String path) {
+		if(D) System.out.println("#ROBOTCONTROLLER importHomeFromXML");
+		this.displayController.showCommandImport(this.getRobotName(), path);
+		Home home = null;
+		try {
+			home = XMLController.parsePlanimetry(path);
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			Log.printXMLException("RobotController", "ImportHomeFromXML", e);
+		}
+		
+		this.homeDAO.saveHome(home);
+		
+		return home;
+	}
+	
 	private void move(Movement movement) {
 		if(D) System.out.println("#ROBOTCONTROLLER move");
 		Location prevLocation = this.gpsController.getLocation();
@@ -117,20 +132,6 @@ public class RobotController {
 	private void unlockLocation(Location location) {
 		if(D) System.out.println("#ROBOTCONTROLLER unlockLocation");
 		this.locationDAO.unlock(this.getCurrentHome(), location);
-	}
-
-	public Home importHomeFromXML(String path) {
-		if(D) System.out.println("#ROBOTCONTROLLER importHomeFromXML");
-		this.displayController.showCommandImport(this.getRobotName(), path);
-		Home home = null;
-		try {
-			home = XMLController.parsePlanimetry(path);
-		} catch (ParserConfigurationException | SAXException | IOException e) {
-			Log.printXMLException("RobotController", "ImportHomeFromXML", e);
-		}
-		
-		//this.homeDAO.saveHome(home);
-		return home;
 	}
 	
 	public void selectHome() {
