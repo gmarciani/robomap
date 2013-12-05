@@ -1,6 +1,5 @@
 package robomap.test;
 
-import robomap.model.home.Home;
 import robomap.model.robot.Robot;
 import robomap.model.vector.Location;
 
@@ -10,18 +9,17 @@ public class Test {
 
 	public static void main(String[] args) {
 		Robot mRobot = new Robot("mRobot");
-		Home mHome = mRobot.importHomeFromXML(XML_PLANIMETRY_PATH);
-		mRobot.setHome(mHome);
-		mRobot.goTo(new Location(9,9));
-		mRobot.goTo(new Location(0,9));
-		mRobot.goToStart();
-		
+		new Thread(mRobot).start();
 		Robot yRobot = new Robot("yRobot");
-		Home yHome = mRobot.importHomeFromXML(XML_PLANIMETRY_PATH);
-		yRobot.setHome(yHome);
+		new Thread(yRobot).start();
+		
+		mRobot.importHomeFromXML(XML_PLANIMETRY_PATH);
+		yRobot.importHomeFromXML(XML_PLANIMETRY_PATH);
+		
+		mRobot.goTo(new Location(9,9));
 		yRobot.goTo(new Location(9,9));
-		yRobot.goTo(new Location(0,9));
-		yRobot.goToStart();
+		mRobot.shutDown();
+		yRobot.shutDown();
 	}
 
 }
