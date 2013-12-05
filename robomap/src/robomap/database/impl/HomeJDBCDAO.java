@@ -11,8 +11,6 @@ import robomap.database.HomeDAO;
 import robomap.database.RoomDAO;
 import robomap.database.WallDAO;
 import robomap.log.Log;
-import robomap.model.base.Dimension;
-import robomap.model.base.Location;
 import robomap.model.home.Door;
 import robomap.model.home.Home;
 import robomap.model.home.Room;
@@ -20,29 +18,20 @@ import robomap.model.home.Wall;
 
 public class HomeJDBCDAO implements HomeDAO {
 	
-	private static final Location START_LOCATION = new Location(0,0);
-	
-	private static ConnectionManager connectionManager;
 	private static HomeDAO homeDAO;
-	private static RoomDAO roomDAO;
-	private static WallDAO wallDAO;
-	private static DoorDAO doorDAO;
 	
-	private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS home ("
-			+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT,"
-			+ "name VARCHAR(20) NOT NULL,"
-			+ "width INT UNSIGNED NOT NULL,"
-			+ "height INT UNSIGNED NOT NULL,"
-			+ "CONSTRAINT pkHome PRIMARY KEY (id))";
+	private ConnectionManager connectionManager;	
+	private RoomDAO roomDAO;
+	private WallDAO wallDAO;
+	private DoorDAO doorDAO;
 	
-	private static final String SQL_INSERT = "";
-	
-	private static final String SQL_UPDATE = "";
-	
-	private static final String SQL_DELETE = "";
+	private static final String SQL_INSERT = "INSERT INTO Home (hname, hwidth, hheight, hstart_x, hstart_y) VALUES (?, ?, ?, ?, ?)";
 	
 	private HomeJDBCDAO() {
-		this.createTable();
+		this.connectionManager = JDBCConnectionManager.getInstance();
+		this.roomDAO = RoomJDBCDAO.getInstance();
+		this.wallDAO = WallJDBCDAO.getInstance();
+		this.doorDAO = DoorJDBCDAO.getInstance();
 	}	
 
 	public static HomeDAO getInstance() {
@@ -51,66 +40,37 @@ public class HomeJDBCDAO implements HomeDAO {
 		}
 		return homeDAO;
 	}
-	
-	private void createTable() {
-		connectionManager = JDBCConnectionManager.getInstance();	
-		
-		Connection connection = connectionManager.getConnection();
-		PreparedStatement statement = null;
-		
+
+	@Override
+	public synchronized void saveHome(Home home) {
+		Connection connection = this.connectionManager.getConnection();
+		PreparedStatement stmt = null;
 		try {
-			statement = connection.prepareStatement(SQL_CREATE_TABLE);
-			statement.executeUpdate();
+			stmt = connection.prepareStatement(SQL_INSERT);
+			stmt.setString(1, home.getName());
+			stmt.setInt(2, home.getDimension().getWidth());
+			stmt.setInt(3, home.getDimension().getHeight());
+			stmt.setInt(4, home.getStart().getX());
+			stmt.setInt(5, home.getStart().getY());
+			stmt.executeUpdate();
 		} catch (SQLException exc) {
-			Log.printSQLException("HomeJDBCDAO", "createTable", exc);
+			Log.printSQLException("HomeJDBCDAO", "saveHome", exc);
+			if (exc.getErrorCode() == 1062) return;
 		} finally {
-			connectionManager.close(connection, statement);
-		}		
-	}	
-
-	@Override
-	public void saveHome(Home home) {
-		String homeName = home.getName();
-		Dimension homeDimension = home.getDimension();
-		List<Room> rooms = home.getRooms();
-		List<Wall> walls = home.getWalls();
-		List<Door> doors = home.getDoors();
+			this.connectionManager.close(stmt);
+		}			
 		
-		for (Room room : rooms) {
-			roomDAO.saveRoom(homeName, room);
+		for (Wall wall : home.getWalls()) {
+			this.wallDAO.saveWall(home.getName(), wall);
 		}
 		
-		for (Wall wall : walls) {
-			wallDAO.saveWall(homeName, wall);
+		for (Door door : home.getDoors()) {
+			this.doorDAO.saveDoor(home.getName(), door);
 		}
 		
-		for (Door door : doors) {
-			doorDAO.saveDoor(homeName, door);
-		}
-		
-	}
-
-	@Override
-	public void updateHome(Home home) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void deleteHome(Home home) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public Home findHome(String homeName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Location getStartLocation(Home home) {
-		return START_LOCATION;
+		for (Room room : home.getRooms()) {
+			this.roomDAO.saveRoom(home.getName(), room);
+		}			
 	}
 
 	@Override

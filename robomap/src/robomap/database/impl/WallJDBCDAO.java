@@ -8,29 +8,18 @@ import robomap.database.ConnectionManager;
 import robomap.database.WallDAO;
 import robomap.log.Log;
 import robomap.model.home.Wall;
+import robomap.model.vector.Location;
 
 public class WallJDBCDAO implements WallDAO {
 	
-	private static ConnectionManager connectionManager;
 	private static WallDAO wallDAO;
 	
-	private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS room ("
-			+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT,"
-			+ "name VARCHAR(20) NOT NULL,"
-			+ "width INT UNSIGNED NOT NULL,"
-			+ "height INT UNSIGNED NOT NULL,"
-			+ "home INT UNSIGNED NOT NULL,"
-			+ "CONSTRAINT pkRoom PRIMARY KEY (id),"
-			+ "CONSTRAINT fkHome FOREIGN KEY (home) REFERENCES home(id) ON DELETE CASCADE)";
+	private ConnectionManager connectionManager;
 	
-	private static final String SQL_INSERT = "";
-	
-	private static final String SQL_UPDATE = "";
-	
-	private static final String SQL_DELETE = "";
+	private static final String SQL_INSERT = "INSERT INTO Wall (hname, wx, wy, worientation, wlenght) VALUES (?, ?, ?, ?, ?)";
 	
 	private WallJDBCDAO() {
-		this.createTable();
+		this.connectionManager = JDBCConnectionManager.getInstance();
 	}
 	
 	public static WallDAO getInstance() {
@@ -39,39 +28,30 @@ public class WallJDBCDAO implements WallDAO {
 		}
 		return wallDAO;
 	}
-	
-	private void createTable() {
-		connectionManager = JDBCConnectionManager.getInstance();	
-		
-		Connection connection = connectionManager.getConnection();
-		PreparedStatement statement = null;
-		
+
+	@Override
+	public synchronized void saveWall(String homeName, Wall wall) {
+		Connection connection = this.connectionManager.getConnection();
+		PreparedStatement stmt = null;
 		try {
-			statement = connection.prepareStatement(SQL_CREATE_TABLE);
-			statement.executeUpdate();
+			stmt = connection.prepareStatement(SQL_INSERT);
+			stmt.setString(1, homeName);
+			stmt.setInt(2, wall.getLocation().getX());
+			stmt.setInt(3, wall.getLocation().getY());
+			stmt.setString(4, wall.getDirection().name());
+			stmt.setInt(5, wall.getLenght());
+			stmt.executeUpdate();
 		} catch (SQLException exc) {
-			Log.printSQLException("RoomJDBCDAO", "createTable", exc);
+			Log.printSQLException("WallJDBCDAO", "saveWall", exc);
 		} finally {
-			connectionManager.close(connection, statement);
-		}	
-	}
-	
-	@Override
-	public void saveWall(String homeName, Wall wall) {
-		// TODO Auto-generated method stub
-		
+			this.connectionManager.close(stmt);
+		}		
 	}
 
 	@Override
-	public void updateWall(String homeName, Wall wall) {
+	public boolean isThereAny(Location locationA, Location locationB) {
 		// TODO Auto-generated method stub
-
+		return false;
 	}
-
-	@Override
-	public void deleteWall(String homeName, Wall wall) {
-		// TODO Auto-generated method stub
-
-	}	
 
 }

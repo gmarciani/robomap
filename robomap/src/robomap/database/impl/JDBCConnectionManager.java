@@ -11,40 +11,21 @@ import robomap.log.Log;
 
 public class JDBCConnectionManager implements ConnectionManager {
 	
-private static JDBCConnectionManager singletonConnectionManager = null;
+	private static JDBCConnectionManager connectionManager;
 	
 	private static final String URL = "jdbc:mysql://localhost:3306/robomap";
 	private static final String USER = "root";
 	private static final String PASSWORD = "password";
-	
-	private static final String SQL_CREATE_DATABASE = "CREATE SCHEMA IF NOT EXISTS robomap";
 
-	private JDBCConnectionManager() {
-		this.createDatabase();
-	}
+	private JDBCConnectionManager() {}
 	
 	public static synchronized JDBCConnectionManager getInstance() {
-		if (singletonConnectionManager == null) {
-			singletonConnectionManager = new JDBCConnectionManager();
+		if (connectionManager == null) {
+			connectionManager = new JDBCConnectionManager();
 		}		
-		return singletonConnectionManager;
+		return connectionManager;
 	}
-	
-	private void createDatabase() {	
-		
-		Connection connection = this.getConnection();
-		PreparedStatement statement = null;
-		
-		try {
-			statement = connection.prepareStatement(SQL_CREATE_DATABASE);
-			statement.executeUpdate();
-		} catch (SQLException exc) {
-			Log.printSQLException("JDBCConnectionManager", "createDatabase", exc);
-		} finally {
-			this.close(statement);
-		}
-	}
-	
+
 	@Override
 	public synchronized Connection getConnection() {
 		try {

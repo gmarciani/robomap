@@ -2,41 +2,33 @@ package robomap.database.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import robomap.database.ConnectionManager;
 import robomap.database.ObjectDAO;
 import robomap.log.Log;
-import robomap.model.base.Direction;
-import robomap.model.base.Location;
 import robomap.model.object.Action;
 import robomap.model.object.Object;
+import robomap.model.vector.Direction;
+import robomap.model.vector.Location;
 
 public class ObjectJDBCDAO implements ObjectDAO {
 	
-	private static ConnectionManager connectionManager = null;
-	private static ObjectJDBCDAO objectDAO = null;
+	private static ObjectJDBCDAO objectDAO;
 	
-	private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS object ("
-			+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT,"
-			+ "name VARCHAR(20) NOT NULL,"
-			+ "x INT UNSIGNED NOT NULL,"
-			+ "y INT UNSIGNED NOT NULL,"
-			+ "width INT UNSIGNED NOT NULL,"
-			+ "height INT UNSIGNED NOT NULL,"
-			+ "room INT UNSIGNED NOT NULL,"
-			+ "CONSTRAINT pkObject PRIMARY KEY (id),"
-			+ "CONSTRAINT fkRoom FOREIGN KEY (room) REFERENCES room(id) ON DELETE CASCADE)";
+	private ConnectionManager connectionManager;	
 	
-	private static final String SQL_INSERT = "";
+	private static final String SQL_INSERT_OBJECT = "INSERT INTO Object (oname, owidth, oheight) VALUES (?, ?, ?)";
 	
-	private static final String SQL_UPDATE = "";
+	private static final String SQL_INSERT_OBJECT_IN_ROOM = "INSERT INTO ObjectIn (hname, rname, oid, ox, oy, oorientation, ostatus) VALUES (?, ?, ?, ?, ?, ?, ?)";
 	
-	private static final String SQL_DELETE = "";
+	private static final String SQL_SELECT_OBJECT_ID = "SELECT oid FROM Object WHERE (oname = ? AND owidth = ? AND oheight = ?)";
 	
 	private ObjectJDBCDAO() {
-		this.createTable();
+		this.connectionManager = JDBCConnectionManager.getInstance();
 	}	
 	
 	public static ObjectJDBCDAO getInstance() {
@@ -46,36 +38,101 @@ public class ObjectJDBCDAO implements ObjectDAO {
 		return objectDAO;
 	}
 	
-	private void createTable() {
-		connectionManager = JDBCConnectionManager.getInstance();	
-		
-		Connection connection = connectionManager.getConnection();
-		PreparedStatement statement = null;
-		
+	@Override
+	public int saveObject(Object object) {
+		Connection connection = this.connectionManager.getConnection();
+		PreparedStatement stmt = null;
+		int id = -1;
 		try {
-			statement = connection.prepareStatement(SQL_CREATE_TABLE);
-			statement.executeUpdate();
+			stmt = connection.prepareStatement(SQL_INSERT_OBJECT, Statement.RETURN_GENERATED_KEYS);
+			stmt.setString(1, object.getName());
+			stmt.setInt(2, object.getDimension().getWidth());
+			stmt.setInt(3, object.getDimension().getHeight());
+			stmt.executeUpdate();
+			ResultSet rs = stmt.getGeneratedKeys();
+			if (rs.next()) id = rs.getInt(1);
 		} catch (SQLException exc) {
-			Log.printSQLException("ObjectJDBCDAO", "createTable", exc);
+			Log.printSQLException("ObjectJDBCDAO", "saveObject", exc);
 		} finally {
-			connectionManager.close(connection, statement);
-		}	
-	}
-
-	@Override
-	public void saveObject(Object object) {
-		// TODO Auto-generated method stub
+			this.connectionManager.close(stmt);	
+		}
 		
+		return id;		
 	}
 
 	@Override
-	public void updateObject(Object object) {
-		// TODO Auto-generated method stub
+	public void saveObject(String homeName, String roomName, Object object) {		
+		int objectId = this.getObjectId(object);
 		
+		if (objectId == -1) objectId = this.saveObject(object);
+		
+		Connection connection = this.connectionManager.getConnection();
+		PreparedStatement stmt = null;
+		try {
+			stmt = connection.prepareStatement(SQL_INSERT_OBJECT_IN_ROOM);
+			stmt.setString(1, homeName);
+			stmt.setString(2, roomName);
+			stmt.setInt(3, objectId);
+			stmt.setInt(4, object.getLocation().getX());
+			stmt.setInt(5, object.getLocation().getY());
+			stmt.setString(6, object.getOrientation().name());
+			stmt.setString(7, object.getStatus());
+			stmt.executeUpdate();
+		} catch (SQLException exc) {
+			Log.printSQLException("ObjectJDBCDAO", "saveObject", exc);
+		} finally {
+			this.connectionManager.close(stmt);
+		}				
+	}
+
+	private int getObjectId(Object object) {
+		Connection connection = this.connectionManager.getConnection();
+		PreparedStatement stmt = null;
+		int id = -1;
+		try {
+			stmt = connection.prepareStatement(SQL_SELECT_OBJECT_ID);
+			stmt.setString(1, object.getName());
+			stmt.setInt(2, object.getDimension().getWidth());
+			stmt.setInt(3, object.getDimension().getHeight());
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) return rs.getInt("oid");	
+		} catch (SQLException exc) {
+			Log.printSQLException("ObjectJDBCDAO", "getObjectId", exc);
+		} finally {
+			this.connectionManager.close(stmt);
+		}
+		
+		return id;			
 	}
 
 	@Override
-	public void deleteObject(Object object) {
+	public boolean isThereAny(Location nextLocation) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Object getObject(String name, String roomName, String objectName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Location getLocation(String name, String roomName, String objectName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Location getLocation(String name, String roomName,
+			String objectName, Action action) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setOrientation(String name, String roomName, String objectName,
+			Direction orientation) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -87,39 +144,21 @@ public class ObjectJDBCDAO implements ObjectDAO {
 	}
 
 	@Override
-	public void changeStatus(Object object, String newStatus) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Location getLocation(Object object) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Location getLocation(Object object, Action action) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Location getLocation(Object object, Direction direction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setLocation(Object payload, Location currentLocation) {
+	public void setStatus(Object object, String status) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public boolean isThereAny(Location nextLocation) {
+	public void setLocation(Object object, Location location) {
 		// TODO Auto-generated method stub
-		return false;
-	}
+		
+	}	
 
 }

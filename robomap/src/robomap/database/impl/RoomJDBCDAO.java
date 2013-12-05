@@ -5,33 +5,25 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import robomap.database.ConnectionManager;
+import robomap.database.ObjectDAO;
 import robomap.database.RoomDAO;
 import robomap.log.Log;
-import robomap.model.base.Location;
 import robomap.model.home.Room;
+import robomap.model.object.Object;
+import robomap.model.vector.Location;
 
 public class RoomJDBCDAO implements RoomDAO {
 	
-	private static ConnectionManager connectionManager;
 	private static RoomDAO roomDAO;
 	
-	private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS room ("
-			+ "id INT UNSIGNED NOT NULL AUTO_INCREMENT,"
-			+ "name VARCHAR(20) NOT NULL,"
-			+ "width INT UNSIGNED NOT NULL,"
-			+ "height INT UNSIGNED NOT NULL,"
-			+ "home INT UNSIGNED NOT NULL,"
-			+ "CONSTRAINT pkRoom PRIMARY KEY (id),"
-			+ "CONSTRAINT fkHome FOREIGN KEY (home) REFERENCES home(id) ON DELETE CASCADE)";
+	private ConnectionManager connectionManager;
+	private ObjectDAO objectDAO;
 	
-	private static final String SQL_INSERT = "";
-	
-	private static final String SQL_UPDATE = "";
-	
-	private static final String SQL_DELETE = "";
+	private static final String SQL_INSERT = "INSERT INTO Room (hname, rname, rx, ry, rwidth, rheight) VALUES (?, ?, ?, ?, ?, ?)";
 	
 	private RoomJDBCDAO() {
-		this.createTable();
+		this.connectionManager = JDBCConnectionManager.getInstance();
+		objectDAO = ObjectJDBCDAO.getInstance();
 	}	
 
 	public static RoomDAO getInstance() {
@@ -40,43 +32,33 @@ public class RoomJDBCDAO implements RoomDAO {
 		}
 		return roomDAO;
 	}
-	
-	private void createTable() {
-		connectionManager = JDBCConnectionManager.getInstance();	
-		
-		Connection connection = connectionManager.getConnection();
-		PreparedStatement statement = null;
-		
+
+	@Override
+	public synchronized void saveRoom(String homeName, Room room) {
+		Connection connection = this.connectionManager.getConnection();
+		PreparedStatement stmt = null;
 		try {
-			statement = connection.prepareStatement(SQL_CREATE_TABLE);
-			statement.executeUpdate();
+			stmt = connection.prepareStatement(SQL_INSERT);
+			stmt.setString(1, homeName);
+			stmt.setString(2, room.getName());
+			stmt.setInt(3, room.getLocation().getX());
+			stmt.setInt(4, room.getLocation().getY());
+			stmt.setInt(5, room.getDimension().getWidth());
+			stmt.setInt(6, room.getDimension().getHeight());
+			stmt.executeUpdate();
 		} catch (SQLException exc) {
-			Log.printSQLException("RoomJDBCDAO", "createTable", exc);
+			Log.printSQLException("RoomJDBCDAO", "saveRoom", exc);
 		} finally {
-			connectionManager.close(connection, statement);
-		}	
-	}
-
-	@Override
-	public void saveRoom(String homeName, Room room) {
-		// TODO Auto-generated method stub
+			this.connectionManager.close(stmt);
+		}			
 		
+		for (Object object : room.getObjects()) {
+			this.objectDAO.saveObject(homeName, room.getName(), object);
+		}			
 	}
 
 	@Override
-	public void updateRoom(String homeName, Room room) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void deleteRoom(String homeName, Room room) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Location getLocation(Room room) {
+	public Location getLocation(String name, String roomName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
