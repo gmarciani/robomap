@@ -5,25 +5,34 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import robomap.database.ConnectionManager;
-import robomap.database.ObjectDAO;
+import robomap.database.DatabaseDebug;
 import robomap.database.RoomDAO;
 import robomap.log.Log;
 import robomap.model.home.Room;
-import robomap.model.object.Object;
 import robomap.model.vector.Location;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.database.impl
+ *
+ * @class RoomJDBCDAO
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class RoomJDBCDAO implements RoomDAO {
 	
 	private static RoomDAO roomDAO;
 	
 	private ConnectionManager connectionManager;
-	private ObjectDAO objectDAO;
 	
 	private static final String SQL_INSERT = "INSERT INTO Room (hname, rname, rx, ry, rwidth, rheight) VALUES (?, ?, ?, ?, ?, ?)";
 	
 	private RoomJDBCDAO() {
 		this.connectionManager = JDBCConnectionManager.getInstance();
-		objectDAO = ObjectJDBCDAO.getInstance();
 	}	
 
 	public static RoomDAO getInstance() {
@@ -45,20 +54,23 @@ public class RoomJDBCDAO implements RoomDAO {
 			stmt.setInt(4, room.getLocation().getY());
 			stmt.setInt(5, room.getDimension().getWidth());
 			stmt.setInt(6, room.getDimension().getHeight());
+			if (DatabaseDebug.D) Log.printSQLStatement(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), stmt);
 			stmt.executeUpdate();
 		} catch (SQLException exc) {
-			Log.printSQLException("RoomJDBCDAO", "saveRoom", exc);
+			if (DatabaseDebug.D) Log.printSQLException(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), exc);
 		} finally {
-			this.connectionManager.close(stmt);
-		}			
-		
-		for (Object object : room.getObjects()) {
-			this.objectDAO.saveObject(homeName, room.getName(), object);
+			this.connectionManager.close(connection);
 		}			
 	}
 
 	@Override
 	public Location getLocation(String name, String roomName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Room getRoom(String name, String roomName) {
 		// TODO Auto-generated method stub
 		return null;
 	}

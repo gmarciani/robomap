@@ -5,11 +5,23 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import robomap.database.ConnectionManager;
+import robomap.database.DatabaseDebug;
 import robomap.database.WallDAO;
 import robomap.log.Log;
 import robomap.model.home.Wall;
-import robomap.model.vector.Location;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.database.impl
+ *
+ * @class WallJDBCDAO
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class WallJDBCDAO implements WallDAO {
 	
 	private static WallDAO wallDAO;
@@ -40,18 +52,13 @@ public class WallJDBCDAO implements WallDAO {
 			stmt.setInt(3, wall.getLocation().getY());
 			stmt.setString(4, wall.getDirection().name());
 			stmt.setInt(5, wall.getLenght());
+			if (DatabaseDebug.D) Log.printSQLStatement(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), stmt);
 			stmt.executeUpdate();
 		} catch (SQLException exc) {
-			Log.printSQLException("WallJDBCDAO", "saveWall", exc);
+			if (DatabaseDebug.D) Log.printSQLException(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), exc);
 		} finally {
-			this.connectionManager.close(stmt);
+			this.connectionManager.close(connection);
 		}		
-	}
-
-	@Override
-	public boolean isThereAny(Location locationA, Location locationB) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 }

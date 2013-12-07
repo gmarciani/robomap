@@ -3,11 +3,13 @@ package robomap.database.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
 
+import robomap.control.DisplayController;
 import robomap.database.ConnectionManager;
+import robomap.database.DatabaseDebug;
 import robomap.database.DoorDAO;
 import robomap.database.HomeDAO;
+import robomap.database.ObjectDAO;
 import robomap.database.RoomDAO;
 import robomap.database.WallDAO;
 import robomap.log.Log;
@@ -15,7 +17,20 @@ import robomap.model.home.Door;
 import robomap.model.home.Home;
 import robomap.model.home.Room;
 import robomap.model.home.Wall;
+import robomap.model.object.Object;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.database.impl
+ *
+ * @class HomeJDBCDAO
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class HomeJDBCDAO implements HomeDAO {
 	
 	private static HomeDAO homeDAO;
@@ -24,6 +39,7 @@ public class HomeJDBCDAO implements HomeDAO {
 	private RoomDAO roomDAO;
 	private WallDAO wallDAO;
 	private DoorDAO doorDAO;
+	private ObjectDAO objectDAO;
 	
 	private static final String SQL_INSERT = "INSERT INTO Home (hname, hwidth, hheight, hstart_x, hstart_y) VALUES (?, ?, ?, ?, ?)";
 	
@@ -32,6 +48,7 @@ public class HomeJDBCDAO implements HomeDAO {
 		this.roomDAO = RoomJDBCDAO.getInstance();
 		this.wallDAO = WallJDBCDAO.getInstance();
 		this.doorDAO = DoorJDBCDAO.getInstance();
+		this.objectDAO = ObjectJDBCDAO.getInstance();
 	}	
 
 	public static HomeDAO getInstance() {
@@ -52,12 +69,14 @@ public class HomeJDBCDAO implements HomeDAO {
 			stmt.setInt(3, home.getDimension().getHeight());
 			stmt.setInt(4, home.getStart().getX());
 			stmt.setInt(5, home.getStart().getY());
+			if (DatabaseDebug.D) Log.printSQLStatement(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), stmt);
 			stmt.executeUpdate();
 		} catch (SQLException exc) {
-			Log.printSQLException("HomeJDBCDAO", "saveHome", exc);
+			DisplayController.getInstance().showError(exc.getMessage());
+			if (DatabaseDebug.D) Log.printSQLException(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), exc);
 			if (exc.getErrorCode() == 1062) return;
 		} finally {
-			this.connectionManager.close(stmt);
+			this.connectionManager.close(connection);
 		}			
 		
 		for (Wall wall : home.getWalls()) {
@@ -70,13 +89,11 @@ public class HomeJDBCDAO implements HomeDAO {
 		
 		for (Room room : home.getRooms()) {
 			this.roomDAO.saveRoom(home.getName(), room);
-		}			
-	}
-
-	@Override
-	public List<Home> getAll() {
-		// TODO Auto-generated method stub
-		return null;
+		}
+		
+		for (Object object : home.getObjects()) {
+			this.objectDAO.saveObject(home.getName(), object);
+		}
 	}
 
 }

@@ -7,8 +7,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import robomap.database.ConnectionManager;
+import robomap.database.DatabaseDebug;
 import robomap.log.Log;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.database.impl
+ *
+ * @class JDBCConnectionManager
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class JDBCConnectionManager implements ConnectionManager {
 	
 	private static JDBCConnectionManager connectionManager;
@@ -31,7 +44,7 @@ public class JDBCConnectionManager implements ConnectionManager {
 		try {
 			return DriverManager.getConnection(URL, USER, PASSWORD);
 		} catch (SQLException exc) {
-			Log.printSQLException("JBDCConnectionManager", "getConnection", exc);
+			if (DatabaseDebug.D) Log.printSQLException(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), exc);
 			return null;
 		}
 	}	
@@ -42,7 +55,7 @@ public class JDBCConnectionManager implements ConnectionManager {
 			try {
 				connection.close();
 			} catch (SQLException exc) {
-				Log.printSQLException("JBDCConnectionManager", "close(connection)", exc);
+				if (DatabaseDebug.D) Log.printSQLException(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), exc);
 			}
 		}
 	}
@@ -53,7 +66,7 @@ public class JDBCConnectionManager implements ConnectionManager {
 			try {
 				statement.close();
 			} catch (SQLException exc) {
-				Log.printSQLException("JBDCConnectionManager", "close(statement)", exc);
+				if (DatabaseDebug.D) Log.printSQLException(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), exc);
 			}
 		}
 	}
@@ -64,7 +77,7 @@ public class JDBCConnectionManager implements ConnectionManager {
 			try {
 				result.close();
 			} catch (SQLException exc) {
-				Log.printSQLException("JBDCConnectionManager", "close(resultset)", exc);
+				if (DatabaseDebug.D) Log.printSQLException(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), exc);
 			}
 		}
 	}

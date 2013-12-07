@@ -1,21 +1,19 @@
 package robomap.database;
 
-import robomap.model.home.Door;
-
 /**
  * @project robomap
  *
  * @package robomap.database
  *
- * @class DoorDAO
+ * @class DatabaseDebug
  *
  * @author Giacomo Marciani
  *
  * @description
  *
  */
-public interface DoorDAO {
+public class DatabaseDebug {
 	
-	public void saveDoor(String homeName, Door door);
+	public static boolean D = false;
 
 }

@@ -4,6 +4,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.database
+ *
+ * @class ConnectionManager
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public interface ConnectionManager {
 	
 	public Connection getConnection();

@@ -5,10 +5,23 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import robomap.database.ConnectionManager;
+import robomap.database.DatabaseDebug;
 import robomap.database.DoorDAO;
 import robomap.log.Log;
 import robomap.model.home.Door;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.database.impl
+ *
+ * @class DoorJDBCDAO
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class DoorJDBCDAO implements DoorDAO {
 	
 	private static DoorDAO doorDAO;
@@ -39,11 +52,12 @@ public class DoorJDBCDAO implements DoorDAO {
 			stmt.setInt(3, door.getLocation().getY());
 			stmt.setString(4, door.getDirection().name());
 			stmt.setInt(5, door.getLenght());
+			if (DatabaseDebug.D) Log.printSQLStatement(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), stmt);
 			stmt.executeUpdate();
 		} catch (SQLException exc) {
-			Log.printSQLException("DoorJDBCDAO", "saveDoor", exc);
+			if (DatabaseDebug.D) Log.printSQLException(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), exc);
 		} finally {
-			this.connectionManager.close(stmt);	
+			this.connectionManager.close(connection);	
 		}		
 			
 	}
