@@ -10,10 +10,22 @@ import robomap.model.home.Home;
 import robomap.model.message.InputMessage;
 import robomap.model.message.Message;
 import robomap.model.message.OutputMessage;
-import robomap.model.object.Action;
+import robomap.model.object.Interaction;
 import robomap.model.vector.Location;
 import robomap.model.vector.Movement;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.control
+ *
+ * @class DisplayController
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class DisplayController {
 
 	private static DisplayController displayController;
@@ -22,6 +34,8 @@ public class DisplayController {
 	private static final Color EXEC_COLOR = Color.BLUE;
 	private static final Color MOVE_COLOR = Color.CYAN;
 	private static final Color STATUS_COLOR = Color.GREEN;
+	private static final Color ERROR_COLOR = Color.RED;
+	private static final Color RESULT_COLOR = Color.YELLOW;
 		
 	private DisplayController() {
 		AnsiConsole.systemInstall();
@@ -48,10 +62,10 @@ public class DisplayController {
 		return this.write(message);
 	}	
 	
-	public int showSelectAction(String robotName, List<Action> actions) {
+	public int showSelectAction(String robotName, List<Interaction> actions) {
 		String body = "SELECT AN ACTION:";
 		List<String> choices = new ArrayList<String>();
-		for (Action action : actions) {
+		for (Interaction action : actions) {
 			choices.add(action.getName());
 		}
 		Message message = new InputMessage(robotName, body, choices, INPUT_COLOR);
@@ -76,8 +90,28 @@ public class DisplayController {
 		this.write(message);
 	}
 	
-	public void showCommadComputePathPlan(String robotName, Home home, Location source, Location destination) {
-		String body = "EXEC COMPUTE PATHPLAN FOR HOME " + home.getName() + " FROM (" + source.getX() + ";" + source.getY() + ") TO (" + destination.getX() + ";" + destination.getY() + ")";
+	public void showCommandComputePathPlan(String robotName, Home home, Location source, Location destination) {
+		String body = "EXEC COMPUTE PATHPLAN FOR HOME " + home.getName() +  " " +
+						"FROM (" + source.getX() + ";" + source.getY() + ") "
+						+"TO (" + destination.getX() + ";" + destination.getY() + ")";
+		Message message = new OutputMessage(robotName, body, EXEC_COLOR);
+		this.write(message);
+	}
+	
+	public void showCommandComputeSelectivePathPlan(String robotName, Home home, Location source, Location destination, Location withoutLocation) {
+		String body = "EXEC COMPUTE SELECTIVE PATHPLAN FOR HOME " + home.getName() + " " +
+				"FROM (" + source.getX() + ";" + source.getY() + ") " +
+				"TO (" + destination.getX() + ";" + destination.getY() + ")" + 
+				"WITHOUT " + withoutLocation;
+		Message message = new OutputMessage(robotName, body, EXEC_COLOR);
+		this.write(message);
+	}
+	
+	public void showCommandComputeSelectivePathPlan(String robotName, Home home, Location source, Location destination, List<Location> withoutLocations) {
+		String body = "EXEC COMPUTE SELECTIVE PATHPLAN FOR HOME " + home.getName() + " " +
+						"FROM (" + source.getX() + ";" + source.getY() + ") " +
+						"TO (" + destination.getX() + ";" + destination.getY() + ")" + 
+						"WITHOUT " + withoutLocations;
 		Message message = new OutputMessage(robotName, body, EXEC_COLOR);
 		this.write(message);
 	}
@@ -93,5 +127,28 @@ public class DisplayController {
 		Message message = new OutputMessage(robotName, body, EXEC_COLOR);
 		this.write(message);
 	}
+	
+	public void showError(String errorMessage) {
+		Message message = new OutputMessage("warning", errorMessage, ERROR_COLOR);
+		this.write(message);
+	}
+
+	public void showBlockingLock(String robotName, String homeName, Location location) {
+		String body = "STATUS FOUND BLOCKING LOCK IN HOME " + homeName + " IN LOCATION (" + location.getX() + ";" + location.getY() + ")";
+		Message message = new OutputMessage(robotName, body, ERROR_COLOR);
+		this.write(message);		
+	}
+
+	public void showSblockingLocation(String robotName, String homeName, Location sblockingLocation) {
+		String body = "FOUND SBLOCKING LOCATION (" + sblockingLocation.getX() + ";" + sblockingLocation.getY() + ") IN " + homeName;
+		Message message = new OutputMessage(robotName, body, RESULT_COLOR);
+		this.write(message);
+	}
+
+	public void showCommandComputeSblockingLocation(String robotName, String homeName, Location location) {
+		String body = "EXEC COMPUTE SBLOCKING LOCATION IN " + homeName + " FOR (" + location.getX() + ";" + location.getY() + ")";
+		Message message = new OutputMessage(robotName, body, EXEC_COLOR);
+		this.write(message);
+	}	
 
 }

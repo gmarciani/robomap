@@ -5,6 +5,18 @@ import java.io.Serializable;
 import robomap.model.vector.Direction;
 import robomap.model.vector.Location;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.home
+ *
+ * @class Door
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class Door implements Serializable {
 	
 	private static final long serialVersionUID = -3076339254360310436L;	
@@ -16,8 +28,7 @@ public class Door implements Serializable {
 	public Door(Location location, Direction direction, int lenght) {
 		this.setLocation(location);
 		this.setDirection(direction);
-		this.setLenght(lenght);
-		
+		this.setLenght(lenght);		
 	}
 
 	public Location getLocation() {

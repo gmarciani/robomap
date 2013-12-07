@@ -4,6 +4,18 @@ import java.io.Serializable;
 
 import robomap.model.vector.Location;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.graph
+ *
+ * @class Node
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class Node implements Serializable {
 	
 	private static final long serialVersionUID = 784064600804020315L;

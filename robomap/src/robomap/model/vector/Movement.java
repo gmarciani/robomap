@@ -4,6 +4,18 @@ import java.io.Serializable;
 
 import robomap.model.graph.Arc;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.vector
+ *
+ * @class Movement
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class Movement implements Serializable {
 
 	private static final long serialVersionUID = -5995788339352550426L;

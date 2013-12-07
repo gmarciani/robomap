@@ -1,8 +1,20 @@
 package robomap.control;
 
-import robomap.model.object.Action;
+import robomap.model.object.Interaction;
 import robomap.model.vector.Movement;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.control
+ *
+ * @class MotorController
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class MotorController {
 	
 	private static final double MILLIS_FOR_MOVEMENT = 1000;
@@ -33,7 +45,7 @@ public class MotorController {
 		this.getGpsController().setLocation(movement);
 	}
 
-	public void doAction(Action action) {
+	public void doAction(Interaction action) {
 		try {
 			Thread.sleep((long) MILLIS_FOR_ACTION);
 		} catch (InterruptedException e) {

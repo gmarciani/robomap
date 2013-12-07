@@ -1,37 +1,33 @@
 package robomap.model.home;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import robomap.model.object.Object;
 import robomap.model.vector.Dimension;
 import robomap.model.vector.Location;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.home
+ *
+ * @class Room
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class Room implements Serializable {
 
 	private static final long serialVersionUID = 1474918982284933753L;
 	
-	private String name; 
-	private Dimension dimension;
+	private String name; 	
 	private Location location;	
-	private List<Object> objects = new ArrayList<Object>();
+	private Dimension dimension;
 	
-	public Room(String name, Dimension dimension, Location location, List<Object> objects) {
-		this.setName(name); 
-		this.setDimension(dimension);
-		this.setLocation(location);		
-		this.setObjects(objects);
-	}
-	
-	public Room(String name, Dimension dimension, Location location) {
+	public Room(String name, Location location, Dimension dimension) {
 		this.setName(name); 		
 		this.setDimension(dimension);
 		this.setLocation(location);
-	}
-	
-	public Room() {
-		
 	}
 
 	public String getName() {
@@ -57,26 +53,13 @@ public class Room implements Serializable {
 	public void setDimension(Dimension dimension) {
 		this.dimension = dimension;
 	}
-
-	public List<Object> getObjects() {
-		return this.objects;
-	}
-
-	public void setObjects(List<Object> objects) {
-		this.objects = objects;
-	}	
-	
-	public void addObject(Object object) {
-		this.objects.add(object);
-	}
 	
 	@Override
 	public String toString() {
 		return "Room(" + 
 				this.getName() + ";" + 
 				this.getDimension().toString() + ";" + 
-				this.getLocation().toString() + ";" + 
-				this.getObjects().toString() + ")";
+				this.getLocation().toString() + ")";
 	}
 	
 	public Location getMiddleLocation() {

@@ -2,27 +2,25 @@ package robomap.model.vector;
 
 import java.io.Serializable;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.vector
+ *
+ * @class Location
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class Location extends Vector implements Serializable {
 
 	private static final long serialVersionUID = -9033935801147702920L;
 	
 	public Location(int x, int y) {
 		super(x, y);
-	}
-	
-	public static Location computeLocation(Location location, Movement movement) {
-		int currX = location.getX();
-		int currY = location.getY();
-		int moveX = (int) (movement.getModule() * movement.getDirection().getVersor().getX());
-		int moveY = (int) (movement.getModule() * movement.getDirection().getVersor().getY());
-		return new Location(currX + moveX, currY + moveY);
-	}
-	
-	public static Location computeLocation(Location location, Direction orientation, Direction relativePosition) {
-		int x = 0;
-		int y = 0;
-		return new Location(x, y);
-	}
+	}	
 	
 	@Override
     public boolean equals(Object o) {
@@ -49,10 +47,19 @@ public class Location extends Vector implements Serializable {
 				this.getY() + ")";
 	}	
 	
-	public static Location getRelativeLocation(Location location, Direction orientation, Direction relativePosition) {
-		Vector rotatedVersor = Vector.rotate(orientation.getVersor(), relativePosition.getRotation());
-		int x = location.getX() + rotatedVersor.getX();
-		int y = location.getY() + rotatedVersor.getY();
+	public static Location computeLocation(Location location, Movement movement) {
+		int currX = location.getX();
+		int currY = location.getY();
+		int moveX = (int) (movement.getModule() * movement.getDirection().getVersor().getX());
+		int moveY = (int) (movement.getModule() * movement.getDirection().getVersor().getY());
+		return new Location(currX + moveX, currY + moveY);
+	}
+
+	public static Location computeLocation(Location location, Direction orientation, Direction direction, int offset) {
+		if (direction == Direction.NONE) return location;
+		Vector rotatedVersor = Vector.rotate(orientation.getVersor(), direction.getRotation());
+		int x = location.getX() + (offset * rotatedVersor.getX());
+		int y = location.getY() + (offset * rotatedVersor.getY());
 		return new Location(x, y);
 	}
 

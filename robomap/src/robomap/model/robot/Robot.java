@@ -6,11 +6,23 @@ import java.util.List;
 
 import robomap.control.RobotController;
 import robomap.model.home.Home;
-import robomap.model.object.Action;
+import robomap.model.object.Interaction;
 import robomap.model.object.Object;
 import robomap.model.vector.Direction;
 import robomap.model.vector.Location;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.robot
+ *
+ * @class Robot
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class Robot extends Thread {	
 	
 	private static final boolean D = false;
@@ -195,7 +207,7 @@ public class Robot extends Thread {
 		this.getCommands().add(command);
 	}
 	
-	public void makeActionOn(String roomName, String objectName, Action action) {
+	public void makeActionOn(String roomName, String objectName, Interaction action) {
 		if(D) System.out.println("makeActionOn");
 		RobotCommand command = new RobotCommand()
 		.setOpcode(RobotOpcode.MAKE_ACTION)

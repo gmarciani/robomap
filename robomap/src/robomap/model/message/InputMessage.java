@@ -5,6 +5,18 @@ import java.util.List;
 
 import static org.fusesource.jansi.Ansi.*;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.message
+ *
+ * @class InputMessage
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class InputMessage implements Message {
 
 	private String robotName;

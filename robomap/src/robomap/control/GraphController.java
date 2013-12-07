@@ -13,18 +13,48 @@ import robomap.model.graph.Arc;
 import robomap.model.graph.Node;
 import robomap.model.graph.Path;
 import robomap.model.home.Home;
-import robomap.model.home.Room;
 import robomap.model.home.Wall;
 import robomap.model.object.Object;
 import robomap.model.vector.Dimension;
-import robomap.model.vector.Direction;
 import robomap.model.vector.Location;
 
-public class GraphController {
+/**
+ * @project robomap
+ *
+ * @package robomap.control
+ *
+ * @class GraphController
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
+public abstract class GraphController {
 	
-	private GraphController() {}
+	public static Path computePath(Home home, Location source, Location destination) {
+		DirectedGraph<Node, Arc> graph = parseGraph(home);
+		Path path = computePath(graph, source, destination);
+		return path;
+	}
+	
+	public static Path computeSelectivePath(Home home, Location source, Location destination, Location withoutLocation) {
+		DirectedGraph<Node, Arc> graph = parseGraph(home);
+		graph.removeVertex(new Node(withoutLocation));
+		Path path = computePath(graph, source, destination);
+		return path;
+	}		
+	
+	public static Path computeSelectivePath(Home home, Location source, Location destination, List<Location> withoutLocations) {
+		DirectedGraph<Node, Arc> graph = parseGraph(home);
+		for (Location location : withoutLocations) {
+			graph.removeVertex(new Node(location));
+		}
+		Path path = computePath(graph, source, destination);
+		return path;
+	}
 
-	public static DirectedGraph<Node, Arc> parseGraph(Home home) {
+	private static DirectedGraph<Node, Arc> parseGraph(Home home) {
 		DirectedGraph<Node, Arc> graph = new DirectedSparseGraph<Node, Arc>();
 		Arc arcTable[][][] = getArcTable(home);		
 		Dimension homeDimension = home.getDimension();
@@ -38,12 +68,24 @@ public class GraphController {
 			}
 		}
 		return graph;
-	}
+	}	
 	
-	public static Path computePath(Home home, Location source, Location destination) {
-		DirectedGraph<Node, Arc> graph = parseGraph(home);
-		Path path = computePath(graph, source, destination);
-		return path;
+	private static Path computePath(DirectedGraph<Node, Arc> graph, Location source, Location destination) {
+		if (source.equals(destination)) {
+			List<Arc> listArc = new ArrayList<Arc>();
+			Arc arc = new Arc(new Node(source), new Node(destination), 0);
+			listArc.add(arc);
+			return new Path(listArc);
+		}
+		
+		Transformer<Arc, Float> transformer = new Transformer<Arc, Float>() {
+			public Float transform(Arc arc) {
+				return arc.getWeight();
+			}
+		};
+		DijkstraShortestPath<Node, Arc> alg = new DijkstraShortestPath<Node, Arc>(graph, transformer);		
+		List<Arc> listArc = alg.getPath(new Node(source), new Node(destination));
+		return new Path(listArc);
 	}
 
 	private static Arc[][][] getArcTable(Home home) {
@@ -73,73 +115,22 @@ public class GraphController {
 	}
 
 	private static boolean blockedByWall(Home home, int x, int y, int xad, int yad) {
-		List<Wall> walls = home.getWalls();
-		for (Wall wall : walls) {
-			Location wallLocation = wall.getLocation();
-			Direction wallDirection = wall.getDirection();
-			int wallLenght = wall.getLenght();
-			int wallX = wallLocation.getX();
-			int wallY = wallLocation.getY();	
-			
-			if (wallDirection == Direction.RIGHT) {
-				for (int wx = wallX; wx < wallX + wallLenght; wx ++) {
-					if ((x == wx && y == wallY - 1 && yad == wallY && (xad == x || xad == x - 1 || xad == x + 1)) 
-							|| (x == wx + 1) && y == wallY - 1 && yad == wallY && xad == wx 
-							|| (x == wx - 1) && y == wallY - 1 && yad == wallY && xad == wx
-							|| (x == wx && y == wallY && yad == wallY - 1 && (xad == x || xad == x - 1 || xad == x + 1))
-							|| (x == wx + 1) && y == wallY && yad == wallY - 1 && xad == wx 
-							|| (x == wx - 1) && y == wallY && yad == wallY - 1 && xad == wx) {
-						return true;
-					}
-				}
-			} else if (wallDirection == Direction.FORWARD) {
-				for (int wy = wallY; wy < wallY + wallLenght; wy ++) {
-					if ((y == wy && x == wallX - 1 && xad == wallX && (yad == y || yad == y - 1 || yad == y + 1)) 
-							|| (y == wy + 1) && x == wallX - 1 && xad == wallX && yad == wy 
-							|| (y == wy - 1) && x == wallX - 1 && xad == wallX && yad == wy
-							|| (y == wy && x == wallX && xad == wallX - 1 && (yad == y || yad == y - 1 || yad == y + 1))
-							|| (y == wy + 1) && x == wallX && xad == wallX - 1 && yad == wy 
-							|| (y == wy - 1) && x == wallX && xad == wallX - 1 && yad == wy) {
-						return true;
-					}
-				}
-			}			
+		for (Wall wall : home.getWalls()) {
+			if (wall.blocks(new Location(x, y), new Location(xad, yad))) {
+				return true;		
+			}
 		}
 		return false;
 	}
 	
 	private static boolean isObject(Home home, int x, int y) {
-		List<Object> objects = new ArrayList<Object>();
-		for (Room room : home.getRooms()) {
-			objects.addAll(room.getObjects());
-		}
-		for (Object object : objects) {
-			Location objectLocation = object.getLocation();
-			Dimension objectDimension = object.getDimension();
-			int objectX = objectLocation.getX();
-			int objectY = objectLocation.getY();							
-			int objectW = objectDimension.getWidth();
-			int objectH = objectDimension.getHeight();
-			for (int ox = objectX; ox < objectX + objectW; ox ++) {
-				for (int oy = objectY; oy < objectY + objectH; oy ++) {
-					if (x == ox && y == oy) return true;
-				}
+		for (Object object : home.getObjects()) {
+			if (object.comprehend(new Location(x, y))) {
+				return true;
 			}
 		}
 		return false;
 	}
 
-	private static Path computePath(DirectedGraph<Node, Arc> graph, Location source, Location destination) {
-		Transformer<Arc, Float> transformer = new Transformer<Arc, Float>() {
-			public Float transform(Arc arc) {
-				return arc.getWeight();
-			}
-		};
-		DijkstraShortestPath<Node, Arc> alg = new DijkstraShortestPath<Node, Arc>(graph, transformer);		
-		List<Arc> listArc = alg.getPath(new Node(source), new Node(destination));
-		return new Path(listArc);
-	}
-	
-	
 	
 }

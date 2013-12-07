@@ -2,6 +2,18 @@ package robomap.model.graph;
 
 import java.io.Serializable;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.graph
+ *
+ * @class Arc
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class Arc implements Serializable {
 
 	private static final long serialVersionUID = -7749827824424648060L;

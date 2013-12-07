@@ -1,9 +1,21 @@
 package robomap.model.robot;
 
-import robomap.model.object.Action;
+import robomap.model.object.Interaction;
 import robomap.model.vector.Direction;
 import robomap.model.vector.Location;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.robot
+ *
+ * @class RobotCommand
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class RobotCommand {
 	
 	private RobotOpcode opcode;
@@ -16,7 +28,7 @@ public class RobotCommand {
 	private Direction relativePositition;
 	private MovementPlan movementPlan;
 	private Location location;
-	private Action action;
+	private Interaction action;
 	
 	public RobotCommand() {
 		this.setOpcode(RobotOpcode.NULL);
@@ -112,11 +124,11 @@ public class RobotCommand {
 		return this;
 	}
 	
-	public Action getAction() {
+	public Interaction getAction() {
 		return this.action;
 	}
 
-	public RobotCommand setAction(Action action) {
+	public RobotCommand setAction(Interaction action) {
 		this.action = action;
 		return this;
 	}

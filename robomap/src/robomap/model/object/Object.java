@@ -1,12 +1,25 @@
 package robomap.model.object;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import robomap.model.vector.Dimension;
 import robomap.model.vector.Direction;
 import robomap.model.vector.Location;
-import robomap.model.vector.Vector;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.object
+ *
+ * @class Object
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class Object implements Serializable {
 	
 	private static final long serialVersionUID = -8604922613106336953L;
@@ -15,7 +28,17 @@ public class Object implements Serializable {
 	private Dimension dimension;
 	private Location location;
 	private Direction orientation;
+	private List<Interaction> interactions = new ArrayList<Interaction>();
 	private String status;
+	
+	public Object(String name, Dimension dimension, Location location, Direction orientation, List<Interaction> interactions, String status) {
+		this.setName(name);
+		this.setDimension(dimension);
+		this.setLocation(location);
+		this.setOrientation(orientation);
+		this.setInteractions(interactions);
+		this.setStatus(status);
+	}
 	
 	public Object(String name, Dimension dimension, Location location, Direction orientation, String status) {
 		this.setName(name);
@@ -25,11 +48,15 @@ public class Object implements Serializable {
 		this.setStatus(status);
 	}
 	
-	public Object(String name, Dimension dimension, Location location, Direction orientation) {
+	public Object(String name, Dimension dimension, Location location) {
 		this.setName(name);
 		this.setDimension(dimension);
 		this.setLocation(location);
-		this.setOrientation(orientation);
+	}
+	
+	public Object(Dimension dimension, Location location) {
+		this.setDimension(dimension);
+		this.setLocation(location);
 	}
 
 	public String getName() {
@@ -63,6 +90,18 @@ public class Object implements Serializable {
 	public void setOrientation(Direction orientation) {
 		this.orientation = orientation;
 	}	
+	
+	public List<Interaction> getInteractions() {
+		return this.interactions;
+	}
+
+	public void setInteractions(List<Interaction> interactions) {
+		this.interactions = interactions;
+	}
+	
+	public void addInteraction(Interaction interaction) {
+		this.getInteractions().add(interaction);
+	}
 
 	public String getStatus() {
 		return this.status;
@@ -78,7 +117,8 @@ public class Object implements Serializable {
 				this.getName() + ";" + 
 				this.getDimension().toString() + ";" + 
 				this.getLocation().toString() + ";" + 
-				this.getStatus() + ")";
+				this.getStatus() + ";" + 
+				this.getInteractions() + ")";
 	}
 	
 	public Location getMiddleLocation() {
@@ -88,10 +128,18 @@ public class Object implements Serializable {
 	}
 	
 	public boolean comprehend(Location location) {
-		return ((location.compareTo(this.getLocation()) == 1 ||  
-				location.compareTo(this.getLocation()) == 0) &&
-				(location.compareTo(Vector.sum(this.getLocation(), this.getDimension())) == -1 || 
-				location.compareTo(Vector.sum(this.getLocation(), this.getDimension())) == 0));
-	}
+		int locX = location.getX();
+		int locY = location.getY();
+		int objX = this.getLocation().getX();
+		int objY = this.getLocation().getY();
+		int objWidth = this.getDimension().getWidth();
+		int objHeight = this.getDimension().getHeight();
+		for (int ox = objX; ox < objX + objWidth; ox ++) {
+			for (int oy = objY; oy < objY + objHeight; oy ++) {
+				if (locX == ox && locY == oy) return true;
+			}
+		}
+		return false;
+	}	
 
 }

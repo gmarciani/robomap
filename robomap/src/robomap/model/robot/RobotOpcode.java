@@ -1,5 +1,17 @@
 package robomap.model.robot;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.robot
+ *
+ * @class RobotOpcode
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public enum RobotOpcode {
 	
 	IMPORT,

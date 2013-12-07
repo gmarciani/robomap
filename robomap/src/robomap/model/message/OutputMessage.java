@@ -3,6 +3,18 @@ package robomap.model.message;
 import java.util.Date;
 import static org.fusesource.jansi.Ansi.*;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.message
+ *
+ * @class OutputMessage
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class OutputMessage implements Message {
 	
 	private String robotName;

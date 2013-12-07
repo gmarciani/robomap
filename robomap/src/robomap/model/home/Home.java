@@ -6,8 +6,20 @@ import java.util.List;
 
 import robomap.model.vector.Dimension;
 import robomap.model.vector.Location;
-import robomap.model.vector.Vector;
+import robomap.model.object.Object;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.home
+ *
+ * @class Home
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class Home implements Serializable {
 	
 	private static final long serialVersionUID = -2389178962534385100L;
@@ -18,20 +30,16 @@ public class Home implements Serializable {
 	private List<Room> rooms = new ArrayList<Room>();
 	private List<Wall> walls = new ArrayList<Wall>();
 	private List<Door> doors = new ArrayList<Door>();
+	private List<Object> objects = new ArrayList<Object>();
 	
-	public Home(String name, Dimension dimension, Location start, List<Room> rooms, List<Wall> walls, List<Door> doors) {
+	public Home(String name, Dimension dimension, Location start, List<Room> rooms, List<Wall> walls, List<Door> doors, List<Object> objects) {
 		this.setName(name);
 		this.setDimension(dimension);
 		this.setStart(start);
 		this.setRooms(rooms);
 		this.setWalls(walls);
 		this.setDoors(doors);
-	}
-	
-	public Home(String name, Dimension dimension, List<Room> rooms) {
-		this.setName(name);
-		this.setDimension(dimension);
-		this.setRooms(rooms);
+		this.setObjects(objects);
 	}
 	
 	public Home(String name, Dimension dimension, Location start) {
@@ -39,17 +47,6 @@ public class Home implements Serializable {
 		this.setDimension(dimension);
 		this.setStart(start);
 	}
-	
-	public Home(String name, Dimension dimension) {
-		this.setName(name);
-		this.setDimension(dimension);
-	}
-	
-	public Home(String name) {
-		this.setName(name);
-	}
-	
-	public Home() {}
 
 	public String getName() {
 		return this.name;
@@ -111,6 +108,18 @@ public class Home implements Serializable {
 		this.doors.add(door);
 	}
 	
+	public List<Object> getObjects() {
+		return this.objects;
+	}
+
+	public void setObjects(List<Object> objects) {
+		this.objects = objects;
+	}
+	
+	public void addObject(Object object) {
+		this.getObjects().add(object);
+	}
+	
 	@Override
 	public String toString() {
 		return "Home(" + 
@@ -119,15 +128,23 @@ public class Home implements Serializable {
 				this.getStart().toString() + ";" +
 				this.getRooms().toString() + ";" + 
 				this.getWalls().toString() + ";" + 
-				this.getDoors().toString() + ")";
+				this.getDoors().toString() + ";" + 
+				this.getObjects() + ")";
 	}
 
 	public boolean comprehend(Location location) {
-		Location homeLocation = new Location(0,0);
-		return ((location.compareTo(homeLocation) == 1 ||  
-				location.compareTo(homeLocation) == 0) &&
-				(location.compareTo(Vector.sum(homeLocation, this.getDimension())) == -1 || 
-				location.compareTo(Vector.sum(homeLocation, this.getDimension())) == 0));
+		int locX = location.getX();
+		int locY = location.getY();
+		int homeX = 0;
+		int homeY = 0;
+		int homeWidth = this.getDimension().getWidth();
+		int homeHeight = this.getDimension().getHeight();
+		for (int ox = homeX; ox < homeX + homeWidth; ox ++) {
+			for (int oy = homeY; oy < homeY + homeHeight; oy ++) {
+				if (locX == ox && locY == oy) return true;
+			}
+		}
+		return false;
 	}
 
 }

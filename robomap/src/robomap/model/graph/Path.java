@@ -3,6 +3,18 @@ package robomap.model.graph;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.graph
+ *
+ * @class Path
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class Path implements Serializable {
 
 	private static final long serialVersionUID = 256914740459007959L;
@@ -19,6 +31,12 @@ public class Path implements Serializable {
 
 	public void setArcs(List<Arc> arcs) {
 		this.arcs = arcs;
+	}
+	
+	@Override
+	public String toString() {
+		return "Path(" + 
+				this.getArcs() + ")";
 	}
 
 }

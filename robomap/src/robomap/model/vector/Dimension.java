@@ -2,6 +2,18 @@ package robomap.model.vector;
 
 import java.io.Serializable;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.vector
+ *
+ * @class Dimension
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class Dimension extends Vector implements Serializable {
 	
 	private static final long serialVersionUID = -367509300511668919L;

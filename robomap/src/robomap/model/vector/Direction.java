@@ -2,6 +2,18 @@ package robomap.model.vector;
 
 import java.io.Serializable;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.vector
+ *
+ * @class Direction
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public enum Direction implements Serializable {
 	
 	FORWARD("FORWRAD", new Vector(0, 1), 0),

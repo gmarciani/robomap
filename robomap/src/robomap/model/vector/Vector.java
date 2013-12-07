@@ -2,7 +2,19 @@ package robomap.model.vector;
 
 import java.io.Serializable;
 
-public class Vector implements Serializable, Comparable<Vector> {
+/**
+ * @project robomap
+ *
+ * @package robomap.model.vector
+ *
+ * @class Vector
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
+public class Vector implements Serializable {
 
 	private static final long serialVersionUID = 2467159919118073955L;
 	
@@ -32,17 +44,6 @@ public class Vector implements Serializable, Comparable<Vector> {
 	
 	public double getModule() {
 		return Math.sqrt((Math.pow(this.getX(), 2)) + (Math.pow(this.getY(), 2)));
-	}
-	
-	@Override
-	public int compareTo(Vector vector) {
-		if (this.getX() > vector.getX() && this.getY() > vector.getY()) {
-			return 1;
-		} else if (this.getX() < vector.getX() && this.getY() < vector.getY()) {
-			return -1;
-		} else {
-			return 0;
-		}
 	}
 	
 	@Override
@@ -84,16 +85,11 @@ public class Vector implements Serializable, Comparable<Vector> {
 	}	
 	
 	public static Vector rotate(Vector vector, int rotation) {
-		System.out.println(vector + " " + rotation);
 		Vector versorX = new Vector(1, 0);
 		int theta = theta(vector, versorX);
-		System.out.println("theta: " + theta + ", " + (theta + rotation));
 		int x = (int) Math.round(Math.cos(Math.toRadians(theta + rotation)));
 		int y = (int) Math.round(Math.sin(Math.toRadians(theta + rotation)));
-		System.out.println(x + " " + y);
 		return new Vector(x, y);
 	}
-
-	
 
 }

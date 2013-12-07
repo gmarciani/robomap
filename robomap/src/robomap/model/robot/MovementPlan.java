@@ -10,6 +10,18 @@ import robomap.model.vector.Direction;
 import robomap.model.vector.Location;
 import robomap.model.vector.Movement;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.robot
+ *
+ * @class MovementPlan
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class MovementPlan implements Serializable {
 	
 	private static final long serialVersionUID = -3311063790419252246L;

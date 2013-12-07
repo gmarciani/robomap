@@ -16,11 +16,24 @@ import robomap.model.home.Door;
 import robomap.model.home.Home;
 import robomap.model.home.Room;
 import robomap.model.home.Wall;
+import robomap.model.object.Interaction;
 import robomap.model.object.Object;
 import robomap.model.vector.Dimension;
 import robomap.model.vector.Direction;
 import robomap.model.vector.Location;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.control
+ *
+ * @class XMLController
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public class XMLController {
 	
 	private static DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -49,27 +62,36 @@ public class XMLController {
 			
 			for (int r = 0; r < nodesRoom.getLength(); r ++) {
 				Element elementRoom = (Element) nodesRoom.item(r);
-				String roomName = elementRoom.getAttribute("name");
-				int roomWidth = Integer.valueOf(elementRoom.getAttribute("width"));
-				int roomHeight = Integer.valueOf(elementRoom.getAttribute("height"));
+				String roomName = elementRoom.getAttribute("name");				
 				int roomLocationX = Integer.valueOf(elementRoom.getAttribute("x"));
 				int roomLocationY = Integer.valueOf(elementRoom.getAttribute("y"));
-				Room room = new Room(roomName, new Dimension(roomWidth, roomHeight), new Location(roomLocationX, roomLocationY));
+				int roomWidth = Integer.valueOf(elementRoom.getAttribute("width"));
+				int roomHeight = Integer.valueOf(elementRoom.getAttribute("height"));
+				Room room = new Room(roomName, new Location(roomLocationX, roomLocationY), new Dimension(roomWidth, roomHeight));
 				
 				NodeList nodesObject = elementRoom.getElementsByTagName("OBJECT");
 				
 				for (int o = 0; o < nodesObject.getLength(); o ++) {
 					Element elementObject = (Element) nodesObject.item(o);
-					String objectName = elementObject.getAttribute("name");
-					int objectWidth = Integer.valueOf(elementObject.getAttribute("width"));
-					int objectHeight = Integer.valueOf(elementObject.getAttribute("height"));
+					String objectName = elementObject.getAttribute("name");	
 					int objectLocationX = Integer.valueOf(elementObject.getAttribute("x"));
 					int objectLocationY = Integer.valueOf(elementObject.getAttribute("y"));
+					int objectWidth = Integer.valueOf(elementObject.getAttribute("width"));
+					int objectHeight = Integer.valueOf(elementObject.getAttribute("height"));
 					Direction objectOrientation = Direction.valueOf(elementObject.getAttribute("orientation"));
-					Object object = new Object(objectName, new Dimension(objectWidth, objectHeight), new Location(objectLocationX, objectLocationY), objectOrientation);
-					room.addObject(object);					
-				}
-				
+					String objectStatus = (elementObject.getAttribute("status"));
+					Object object = new Object(objectName, new Dimension(objectWidth, objectHeight), new Location(objectLocationX, objectLocationY), objectOrientation, objectStatus);
+					
+					NodeList nodesInteraction= elementObject.getElementsByTagName("INTERACTION");
+					
+					for (int i = 0; i < nodesInteraction.getLength(); i ++) {
+						Element elementInteraction = (Element) nodesInteraction.item(i);
+						Interaction interaction = Interaction.valueOf(elementInteraction.getAttribute("name"));						
+						object.addInteraction(interaction);
+					}
+					home.addObject(object);
+					
+				}				
 				home.addRoom(room);
 			}
 			

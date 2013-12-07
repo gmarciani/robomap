@@ -1,5 +1,17 @@
 package robomap.model.robot;
 
+/**
+ * @project robomap
+ *
+ * @package robomap.model.robot
+ *
+ * @class RobotStatus
+ *
+ * @author Giacomo Marciani
+ *
+ * @description
+ *
+ */
 public enum RobotStatus {
 	
 	INITIALIZATION,
