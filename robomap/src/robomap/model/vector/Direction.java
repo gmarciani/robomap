@@ -54,16 +54,16 @@ public enum Direction implements Serializable {
 		double destinationX = destination.getX();
 		double destinationY = destination.getY();
 		
-		if(destinationX > sourceX) {
+		if (destinationX > sourceX) {
 			if(destinationY > sourceY) {
 				return Direction.DIAGONAL_TOP_RIGHT;
-			} else if(destinationY < sourceY) {
+			} else if (destinationY < sourceY) {
 				return Direction.DIAGONAL_BOTTOM_RIGHT;
 			} else {
 				return Direction.RIGHT;
 			}
 			
-		} else if(destinationX < sourceX){
+		} else if (destinationX < sourceX){
 			if(destinationY > sourceY) {
 				return Direction.DIAGONAL_TOP_LEFT;
 			} else if(destinationY < sourceY) {
@@ -72,13 +72,35 @@ public enum Direction implements Serializable {
 				return Direction.LEFT;
 			}
 		} else {
-			if(destinationY > sourceY) {
+			if (destinationY > sourceY) {
 				return Direction.FORWARD;
-			} else if(destinationY < sourceY) {
+			} else if (destinationY < sourceY) {
 				return Direction.BACKWARD;
 			} else {
 				return Direction.NONE;
 			}
+		}
+	}
+
+	public static Direction getOpposite(Direction direction) {
+		if (direction == Direction.FORWARD) {
+			return Direction.BACKWARD;
+		} else if (direction == Direction.BACKWARD) {
+			return Direction.FORWARD;
+		} else if (direction == Direction.RIGHT) {
+			return Direction.LEFT;
+		} else if (direction == Direction.LEFT) {
+			return Direction.RIGHT;
+		} else if (direction == Direction.DIAGONAL_TOP_LEFT) {
+			return Direction.DIAGONAL_BOTTOM_RIGHT;
+		} else if (direction == Direction.DIAGONAL_TOP_RIGHT) {
+			return Direction.DIAGONAL_BOTTOM_LEFT;
+		} else if (direction == Direction.DIAGONAL_BOTTOM_LEFT) {
+			return Direction.DIAGONAL_TOP_RIGHT;
+		} else if (direction == Direction.DIAGONAL_BOTTOM_RIGHT) {
+			return Direction.DIAGONAL_TOP_LEFT;
+		} else {
+			return Direction.NONE;
 		}
 	}
 

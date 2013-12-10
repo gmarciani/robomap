@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import robomap.control.RobotController;
+import robomap.exception.ObjectDimensionException;
+import robomap.exception.ObjectNotFoundException;
+import robomap.exception.RoomNotFoundException;
 import robomap.model.home.Home;
 import robomap.model.object.Interaction;
 import robomap.model.object.Object;
@@ -24,8 +27,6 @@ import robomap.model.vector.Location;
  *
  */
 public class Robot extends Thread {	
-	
-	private static final boolean D = false;
 	
 	private RobotController robotController;
 	private RobotStatus status;
@@ -51,7 +52,6 @@ public class Robot extends Thread {
 	}
 
 	private void setStatus(RobotStatus status) {
-		if(D) System.out.println("setStatus " + status);
 		this.status = status;
 	}
 	
@@ -63,7 +63,7 @@ public class Robot extends Thread {
 		this.commands = commands;
 	}
 	
-	public boolean isActive() {
+	private boolean isActive() {
 		return this.isActive;
 	}
 
@@ -88,52 +88,115 @@ public class Robot extends Thread {
 
 	private void executeCommand(RobotCommand command) {
 			this.setStatus(RobotStatus.EXECUTION);
+			Location location = null;
+			MovementPlan movementPlan = null;
+			Object object = null;
 			switch(command.getOpcode()) {
 			case IMPORT:
 				Home home = this.robotController.importHomeFromXML(command.getFilePath());
 				this.robotController.setCurrentHome(home);
 				break;
 			case GOTO_START:
-				Location startLocation = this.robotController.getStartLocation();
-				MovementPlan movementPlanToStart = this.robotController.getMovementPlanTo(startLocation);
-				this.robotController.move(movementPlanToStart);
+				location = this.robotController.getStartLocation();
+				movementPlan = this.robotController.getMovementPlanTo(location);
+				this.robotController.move(movementPlan);
 				break;
 			case GOTO_LOCATION:
-				MovementPlan movementPlanToDestination = this.robotController.getMovementPlanTo(command.getLocation());
-				this.robotController.move(movementPlanToDestination);
+				movementPlan = this.robotController.getMovementPlanTo(command.getLocation());
+				this.robotController.move(movementPlan);
 				break;
 			case GOTO_ROOM:
-				Location roomLocation = this.robotController.getRoomLocation(command.getRoomName());
-				MovementPlan movementPlanToRoom = this.robotController.getMovementPlanTo(roomLocation);
-				this.robotController.move(movementPlanToRoom);
+				try {
+					location = this.robotController.getRoomLocation(command.getRoomName());
+					movementPlan = this.robotController.getMovementPlanTo(location);
+					this.robotController.move(movementPlan);
+				} catch (RoomNotFoundException exc) {
+					this.robotController.showException(exc);
+				}				
 				break;
 			case GOTO_OBJECT:
-				Location objectLocation = this.robotController.getObjectLocation(command.getRoomName(), command.getObjectName());
-				MovementPlan movementPlanToObject = this.robotController.getMovementPlanTo(objectLocation);
-				this.robotController.move(movementPlanToObject);
+				try {
+					location = this.robotController.getObjectLocation(command.getObjectName());
+					movementPlan = this.robotController.getMovementPlanTo(location);
+					this.robotController.move(movementPlan);
+				} catch (ObjectNotFoundException exc) {
+					this.robotController.showException(exc);
+				}				
 				break;
-			case GOTO_OBJECT_DIRECTION:
-				Location objectLocationDirection = this.robotController.getObjectLocation(command.getRoomName(), command.getObjectName(), command.getRelativePositition());
-				MovementPlan movementPlanToObjectDirection = this.robotController.getMovementPlanTo(objectLocationDirection);
-				this.robotController.move(movementPlanToObjectDirection);
+			case GOTO_OBJECT_IN_ROOM:
+				try {
+					location = this.robotController.getObjectLocation(command.getRoomName(), command.getObjectName());
+					movementPlan = this.robotController.getMovementPlanTo(location);
+					this.robotController.move(movementPlan);
+				} catch (ObjectNotFoundException exc) {
+					this.robotController.showException(exc);
+				}				
 				break;
-			case MOVE_OBJECT:
-				Object objectToMove = this.robotController.getObject(command.getRoomName(), command.getObjectName());
-				objectLocation = objectToMove.getLocation();
-				movementPlanToObject = this.robotController.getMovementPlanTo(objectLocation);
-				this.robotController.move(movementPlanToObject);
-				this.robotController.addPayload(objectToMove);
-				movementPlanToDestination = this.robotController.getMovementPlanTo(command.getLocation());
-				this.robotController.move(movementPlanToDestination);
-				this.robotController.setObjectOrientation(command.getRoomName(), command.getObjectName(), command.getOrientation());
+			case GOTO_OBJECT_WITH_DIRECTION:
+				try {
+					location = this.robotController.getObjectLocation(command.getObjectName(), command.getDirection());
+					movementPlan = this.robotController.getMovementPlanTo(location);
+					this.robotController.move(movementPlan);
+				} catch (ObjectNotFoundException exc) {
+					this.robotController.showException(exc);
+				}				
+				break;
+			case GOTO_OBJECT_IN_ROOM_WITH_DIRECTION:
+				try {
+					location = this.robotController.getObjectLocation(command.getRoomName(), command.getObjectName(), command.getDirection());
+					movementPlan = this.robotController.getMovementPlanTo(location);
+					this.robotController.move(movementPlan);
+				} catch (ObjectNotFoundException exc) {
+					this.robotController.showException(exc);
+				}				
+				break;
+			case GOTO_OBJECT_NEAR_OBJECT:
+				try {
+					location = this.robotController.getObjectLocation(command.getObjectName(), command.getDirection(), command.getNearObjectName());
+				} catch (ObjectNotFoundException exc) {
+					this.robotController.showException(exc);
+				}
+				movementPlan = this.robotController.getMovementPlanTo(location);
+				this.robotController.move(movementPlan);
+				break;
+			case MOVE_OBJECT_TO_ROOM:
+				object = this.robotController.getObject(command.getObjectName());
+				location = Location.computeLocation(object.getLocation(), object.getOrientation(), Direction.FORWARD, 1);
+				movementPlan = this.robotController.getMovementPlanTo(location);
+				this.robotController.move(movementPlan);
+				try {
+					this.robotController.addPayload(object);
+					location = this.robotController.getRoomLocation(command.getRoomName());
+				} catch (ObjectDimensionException | RoomNotFoundException exc) {
+					this.robotController.showException(exc);
+				}				
+				movementPlan = this.robotController.getMovementPlanTo(location);
+				this.robotController.move(movementPlan);
 				this.robotController.releasePayload();
 				break;
-			case MAKE_ACTION:
-				Object objectToActOn = this.robotController.getObject(command.getRoomName(), command.getObjectName());
-				Location location = objectToActOn.getLocation();
-				MovementPlan movementPlan = this.robotController.getMovementPlanTo(location);
+			case MAKE_ACTION_ON_OBJECT:
+				object = this.robotController.getObject(command.getObjectName());
+				location = Location.computeLocation(object.getLocation(), object.getOrientation(), Direction.FORWARD, 1);
+				movementPlan = this.robotController.getMovementPlanTo(location);
 				this.robotController.move(movementPlan);		
-				this.robotController.doAction(objectToActOn, command.getAction());
+				this.robotController.makeAction(object, command.getAction());
+				break;
+			case MAKE_ACTION_ON_OBJECT_IN_ROOM:
+				object = this.robotController.getObject(command.getRoomName(), command.getObjectName());
+				location = Location.computeLocation(object.getLocation(), object.getOrientation(), Direction.FORWARD, 1);
+				movementPlan = this.robotController.getMovementPlanTo(location);
+				this.robotController.move(movementPlan);		
+				this.robotController.makeAction(object, command.getAction());
+				break;
+			case CHECK_OBJECT_STATUS:
+				try {
+					location = this.robotController.getObjectLocation(command.getObjectName(), Direction.FORWARD);
+				} catch (ObjectNotFoundException exc) {
+					this.robotController.showException(exc);
+				}
+				movementPlan = this.robotController.getMovementPlanTo(location);
+				this.robotController.move(movementPlan);
+				this.robotController.checkObjectStatus(command.getObjectName());
 				break;
 			case SHUT_DOWN:
 				this.robotController.shutDown();
@@ -147,7 +210,6 @@ public class Robot extends Thread {
 	}
 
 	public void importHomeFromXML(String xmlFilePath) {
-		if(D) System.out.println("importHomeFromXML");
 		RobotCommand command = new RobotCommand()
 		.setOpcode(RobotOpcode.IMPORT)
 		.setFilePath(xmlFilePath);
@@ -155,7 +217,6 @@ public class Robot extends Thread {
 	}	
 	
 	public void goTo(Location destination) {
-		if(D) System.out.println("goToLocation");
 		RobotCommand command = new RobotCommand()
 		.setOpcode(RobotOpcode.GOTO_LOCATION)
 		.setLocation(destination);
@@ -163,43 +224,62 @@ public class Robot extends Thread {
 	}
 	
 	public void goToStart() {
-		if(D) System.out.println("goToStart");
 		RobotCommand command = new RobotCommand()
 		.setOpcode(RobotOpcode.GOTO_START);
 		this.getCommands().add(command);
 	}
 
-	public void goTo(String roomName) {
-		if(D) System.out.println("goToRoom");
+	public void goToRoom(String roomName) {
 		RobotCommand command = new RobotCommand()
 		.setOpcode(RobotOpcode.GOTO_ROOM)
 		.setRoomName(roomName);
 		this.getCommands().add(command);
 	}
 	
-	public void goTo(String roomName, String objectName) {
-		if(D) System.out.println("goToObject");
+	public void goToObject(String objectName) {
 		RobotCommand command = new RobotCommand()
 		.setOpcode(RobotOpcode.GOTO_OBJECT)
+		.setObjectName(objectName);
+		this.getCommands().add(command);
+	}
+	
+	public void goToObject(String objectName, Direction direction) {
+		RobotCommand command = new RobotCommand()
+		.setOpcode(RobotOpcode.GOTO_OBJECT_WITH_DIRECTION)
+		.setObjectName(objectName)
+		.setDirection(direction);
+		this.getCommands().add(command);
+	}
+	
+	public void goToObject(String roomName, String objectName) {
+		RobotCommand command = new RobotCommand()
+		.setOpcode(RobotOpcode.GOTO_OBJECT_IN_ROOM)
 		.setRoomName(roomName)
 		.setObjectName(objectName);
 		this.getCommands().add(command);
 	}
 	
-	public void goTo(String roomName, String objectName, Direction direction) {
-		if(D) System.out.println("goToObjectDirection");
+	public void goToObject(String roomName, String objectName, Direction direction) {
 		RobotCommand command = new RobotCommand()
-		.setOpcode(RobotOpcode.GOTO_OBJECT_DIRECTION)
+		.setOpcode(RobotOpcode.GOTO_OBJECT_IN_ROOM_WITH_DIRECTION)
 		.setRoomName(roomName)
 		.setObjectName(objectName)
-		.setRelativePositition(direction);
-		this.getCommands().add(command);	
+		.setDirection(direction);
+		this.getCommands().add(command);
+	}
+	
+	public void goToObject(String objectName, Direction direction, String nearObjectName) {
+		RobotCommand command = new RobotCommand()
+		.setOpcode(RobotOpcode.GOTO_OBJECT_NEAR_OBJECT)
+		.setObjectName(objectName)
+		.setDirection(direction)
+		.setNearObjectName(nearObjectName);
+		this.getCommands().add(command);
 	}
 	
 	public void moveObject(String roomName, String objectName, Location destination, Direction orientation) {
-		if(D) System.out.println("moveObject");
 		RobotCommand command = new RobotCommand()
-		.setOpcode(RobotOpcode.MOVE_OBJECT)
+		.setOpcode(RobotOpcode.MOVE_OBJECT_TO_ROOM)
 		.setRoomName(roomName)
 		.setObjectName(objectName)
 		.setLocation(destination)
@@ -207,10 +287,17 @@ public class Robot extends Thread {
 		this.getCommands().add(command);
 	}
 	
-	public void makeActionOn(String roomName, String objectName, Interaction action) {
-		if(D) System.out.println("makeActionOn");
+	public void makeActionOn(String objectName, Interaction action) {
 		RobotCommand command = new RobotCommand()
-		.setOpcode(RobotOpcode.MAKE_ACTION)
+		.setOpcode(RobotOpcode.MAKE_ACTION_ON_OBJECT)
+		.setObjectName(objectName)
+		.setAction(action);
+		this.getCommands().add(command);
+	}
+	
+	public void makeActionOn(String roomName, String objectName, Interaction action) {
+		RobotCommand command = new RobotCommand()
+		.setOpcode(RobotOpcode.MAKE_ACTION_ON_OBJECT_IN_ROOM)
 		.setRoomName(roomName)
 		.setObjectName(objectName)
 		.setAction(action);
@@ -218,9 +305,24 @@ public class Robot extends Thread {
 	}
 	
 	public void shutDown() {
-		if(D) System.out.println("shutDown");
 		RobotCommand command = new RobotCommand()
 		.setOpcode(RobotOpcode.SHUT_DOWN);
+		this.getCommands().add(command);
+	}
+
+	public void checkStatus(String objectName, String status) {
+		RobotCommand command = new RobotCommand()
+		.setOpcode(RobotOpcode.CHECK_OBJECT_STATUS)
+		.setObjectName(objectName)
+		.setStatus(status);
+		this.getCommands().add(command);
+	}
+
+	public void moveObject(String objectName, String roomName) {
+		RobotCommand command = new RobotCommand()
+		.setOpcode(RobotOpcode.MOVE_OBJECT_TO_ROOM)
+		.setObjectName(objectName)
+		.setRoomName(roomName);
 		this.getCommands().add(command);
 	}	
 

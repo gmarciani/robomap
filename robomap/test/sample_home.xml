@@ -31,7 +31,9 @@
         	    <INTERACTION name="SWITCH_ON"/>
         	    <INTERACTION name="SWITCH_OFF"/>
         	</OBJECT>
-        	<OBJECT name="divano" x="14" y="8" width="1" height="2" orientation="LEFT"/>
+        	<OBJECT name="divano" x="14" y="8" width="1" height="2" orientation="LEFT">
+        	    <INTERACTION name="CLEAN"/>
+        	</OBJECT>
         	<OBJECT name="tavolo" x="17" y="9" width="1" height="1" orientation="LEFT"/>
     	</ROOM>
     	

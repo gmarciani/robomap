@@ -24,11 +24,13 @@ public class RobotCommand {
 	private String homeName;
 	private String roomName;
 	private String objectName;
+	private String nearObjectName;
 	private Direction orientation;
-	private Direction relativePositition;
+	private Direction direction;
 	private MovementPlan movementPlan;
 	private Location location;
 	private Interaction action;
+	private String status;
 	
 	public RobotCommand() {
 		this.setOpcode(RobotOpcode.NULL);
@@ -97,12 +99,12 @@ public class RobotCommand {
 		return this;
 	}
 
-	public Direction getRelativePositition() {
-		return this.relativePositition;
+	public Direction getDirection() {
+		return this.direction;
 	}
 
-	public RobotCommand setRelativePositition(Direction relativePositition) {
-		this.relativePositition = relativePositition;
+	public RobotCommand setDirection(Direction direction) {
+		this.direction = direction;
 		return this;
 	}
 
@@ -142,11 +144,29 @@ public class RobotCommand {
 				this.getRoomName() + ", " + 
 				this.getObjectName() + ", " + 
 				this.getOrientation() + ", " + 
-				this.getRelativePositition() + ", " + 
+				this.getDirection() + ", " + 
 				this.getLocation() + ", " + 
 				this.getMovementPlan() + ", " + 
 				this.getFilePath() + ", " + 
 				this.getAction() + ")";
+	}
+
+	public String getNearObjectName() {
+		return this.nearObjectName;
+	}
+
+	public RobotCommand setNearObjectName(String nearObjectName) {
+		this.nearObjectName = nearObjectName;
+		return this;
+	}
+
+	public String getStatus() {
+		return this.status;
+	}
+
+	public RobotCommand setStatus(String status) {
+		this.status = status;
+		return this;
 	}	
 
 }

@@ -2,6 +2,7 @@ package robomap.database.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import robomap.database.ConnectionManager;
@@ -9,6 +10,7 @@ import robomap.database.DatabaseDebug;
 import robomap.database.RoomDAO;
 import robomap.log.Log;
 import robomap.model.home.Room;
+import robomap.model.vector.Dimension;
 import robomap.model.vector.Location;
 
 /**
@@ -30,6 +32,8 @@ public class RoomJDBCDAO implements RoomDAO {
 	private ConnectionManager connectionManager;
 	
 	private static final String SQL_INSERT = "INSERT INTO Room (hname, rname, rx, ry, rwidth, rheight) VALUES (?, ?, ?, ?, ?, ?)";
+	
+	private static final String SQL_SELECT_ROOM = "SELECT rx, ry, rwidth, rheight FROM Room WHERE hname = ? AND rname = ?";
 	
 	private RoomJDBCDAO() {
 		this.connectionManager = JDBCConnectionManager.getInstance();
@@ -64,15 +68,30 @@ public class RoomJDBCDAO implements RoomDAO {
 	}
 
 	@Override
-	public Location getLocation(String name, String roomName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Room getRoom(String name, String roomName) {
-		// TODO Auto-generated method stub
-		return null;
+	public Room getRoom(String homeName, String roomName) {
+		Connection connection = this.connectionManager.getConnection();
+		PreparedStatement stmt = null;
+		Room room = null;
+		try {
+			stmt = connection.prepareStatement(SQL_SELECT_ROOM);
+			stmt.setString(1, homeName);
+			stmt.setString(2, roomName);
+			if (DatabaseDebug.D) Log.printSQLStatement(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), stmt);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.first()) {
+				int x = rs.getInt(1);
+				int y = rs.getInt(2);
+				int width = rs.getInt(3);
+				int height = rs.getInt(4);
+				room = new Room(roomName, new Location(x, y), new Dimension(width, height));
+			}
+		} catch (SQLException exc) {
+			if (DatabaseDebug.D) Log.printSQLException(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), exc);
+		} finally {
+			this.connectionManager.close(connection);
+		}
+		
+		return room;
 	}
 
 }

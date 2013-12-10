@@ -16,6 +16,10 @@ import robomap.database.impl.LockJDBCDAO;
 import robomap.database.impl.ObjectJDBCDAO;
 import robomap.database.impl.RoomJDBCDAO;
 import robomap.exception.BlockingLockException;
+import robomap.exception.NotFoundException;
+import robomap.exception.ObjectDimensionException;
+import robomap.exception.ObjectNotFoundException;
+import robomap.exception.RoomNotFoundException;
 import robomap.log.Log;
 import robomap.model.graph.Path;
 import robomap.model.home.Home;
@@ -92,7 +96,7 @@ public class RobotController {
 		} catch (BlockingLockException exc) {
 			if (ControlDebug.D) Log.printException(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), exc);
 			this.displayController.showBlockingLock(this.getRobotName(), this.getCurrentHome().getName(), exc.getLocation());
-			startLocation = this.getClosestLocation(startLocation);
+			startLocation = this.getClosestLocation(startLocation, 3);
 		}
 		this.gpsController.setLocation(startLocation);		
 		this.showStatus();		
@@ -114,69 +118,109 @@ public class RobotController {
 	
 	public Location getStartLocation() {
 		Location startLocation = this.getCurrentHome().getStart();
-		Location closestStartLocation = this.getClosestLocation(startLocation);
+		Location closestStartLocation = this.getClosestLocation(startLocation, 3);
 		return closestStartLocation;
 	}
 	
-	public Location getRoomLocation(String roomName) {
+	public Location getRoomLocation(String roomName) throws RoomNotFoundException {
+		this.displayController.showCommandComputeRoomLocation(this.getRobotName(), this.getCurrentHome().getName(), roomName);
 		Room room = this.roomDAO.getRoom(this.getCurrentHome().getName(), roomName);
-		Location roomMiddleLocation = room.getMiddleLocation();
-		Location closestRoomMiddleLocation = this.getClosestLocation(roomMiddleLocation);
-		return closestRoomMiddleLocation;
+		if (room == null) throw new RoomNotFoundException(roomName);		
+		Location roomLocation = room.getMiddleLocation();
+		Location destination = this.getClosestLocation(roomLocation, 3);
+		this.displayController.showRoomFound(this.getRobotName(), this.getCurrentHome().getName(), roomName, destination);
+		return destination;
 	}
 	
-	public Object getObject(String roomName, String objectName) {
-		return this.objectDAO.getObject(this.getCurrentHome().getName(), roomName, objectName);
-	}
-
-	public Location getObjectLocation(String roomName, String objectName) {
-		return this.objectDAO.getLocation(this.getCurrentHome().getName(), roomName, objectName);
-	}
-	
-	public Location getObjectLocation(String roomName, String objectName, Interaction action) {
-		return this.objectDAO.getLocation(this.getCurrentHome().getName(), roomName, objectName, action);
-	}
-
-	public Location getObjectLocation(String roomName, String objectName, Direction direction) {
-		Object object = this.objectDAO.getObject(this.getCurrentHome().getName(), roomName, objectName);
-		Location location = object.getMiddleLocation();
-		Location prevLocation = location;
-		while (object.comprehend(location)) {
-			prevLocation = location;
-			location = Location.computeLocation(prevLocation, object.getOrientation(), direction, 1);
-		}
-		
-		if (!this.isValidLocation(location) || this.isThereWall(prevLocation, location) || this.isThereObject(location)) {
-			return null;
-		}
-		return location;
+	public Location getObjectLocation(String objectName) throws ObjectNotFoundException {
+		this.displayController.showCommandComputeObjectLocation(this.getRobotName(), this.getCurrentHome().getName(), objectName);
+		Object object = this.objectDAO.getObject(this.getCurrentHome().getName(), objectName);
+		if (object == null) throw new ObjectNotFoundException(objectName);
+		Location destination = this.getClosestLocationToObject(object);
+		this.displayController.showObjectFound(this.getRobotName(), this.getCurrentHome().getName(), objectName, destination);
+		return destination;
 	}	
 
-	public void setObjectOrientation(String roomName, String objectName, Direction orientation) {
-		this.objectDAO.setOrientation(this.getCurrentHome().getName(), roomName, objectName, orientation);
+	public Location getObjectLocation(String roomName, String objectName) throws ObjectNotFoundException {
+		this.displayController.showCommandComputeObjectLocation(this.getRobotName(), this.getCurrentHome().getName(), roomName, objectName);
+		Object object = this.objectDAO.getObject(this.getCurrentHome().getName(), roomName, objectName);
+		if (object == null) throw new ObjectNotFoundException(objectName);
+		Location destination = this.getClosestLocationToObject(object);
+		this.displayController.showObjectFound(this.getRobotName(), this.getCurrentHome().getName(), objectName, destination);
+		return destination;
+	}	
+	
+	public Location getObjectLocation(String objectName, Direction direction) throws ObjectNotFoundException {
+		this.displayController.showCommandComputeObjectLocation(this.getRobotName(), this.getCurrentHome().getName(), objectName, direction);
+		Object object = this.objectDAO.getObject(this.getCurrentHome().getName(), objectName);
+		if (object == null) throw new ObjectNotFoundException(objectName);
+		Location objectEdge = object.getObjectEdge(direction);
+		Location destination = this.getSelectiveClosestLocation(objectEdge, 3, object.getCoveredLocations());
+		this.displayController.showObjectFound(this.getRobotName(), this.getCurrentHome().getName(), objectName, destination);
+		return destination;
+	}	
+
+	public Location getObjectLocation(String roomName, String objectName, Direction direction) throws ObjectNotFoundException {
+		this.displayController.showCommandComputeObjectLocation(this.getRobotName(), this.getCurrentHome().getName(), roomName, objectName, direction);
+		Object object = this.objectDAO.getObject(this.getCurrentHome().getName(), roomName, objectName);
+		if (object == null) throw new ObjectNotFoundException(objectName);
+		Location objectEdge = object.getObjectEdge(direction);
+		Location destination = this.getSelectiveClosestLocation(objectEdge, 3, object.getCoveredLocations());
+		this.displayController.showObjectFound(this.getRobotName(), this.getCurrentHome().getName(), objectName, destination);
+		return destination;
+	}	
+	
+	public Location getObjectLocation(String objectName, Direction direction, String nearObjectName) throws ObjectNotFoundException {
+		this.displayController.showCommandComputeObjectNearLocation(this.getRobotName(), this.getCurrentHome().getName(), objectName, direction, nearObjectName);
+		Object object = this.objectDAO.getObject(this.getCurrentHome().getName(), objectName, direction, nearObjectName);
+		if (object == null) throw new ObjectNotFoundException(objectName);
+		Location destination = this.getClosestLocationToObject(object);
+		this.displayController.showObjectFound(this.getRobotName(), this.getCurrentHome().getName(), objectName, destination);
+		return destination;
 	}
 	
-	public void doAction(Object object, Interaction action) {
+	public Object getObject(String objectName) {
+		Object object = this.objectDAO.getObject(this.getCurrentHome().getName(), objectName);
+		return object;
+	}
+
+	public Object getObject(String roomName, String objectName) {
+		Object object = this.objectDAO.getObject(this.getCurrentHome().getName(), roomName, objectName);
+		return object;
+	}
+	
+	public void checkObjectStatus(String objectName) {
+		this.displayController.showCommandCheckObjectStatus(this.getRobotName(), this.getCurrentHome().getName(), objectName);
+		Object object = this.objectDAO.getObject(this.getCurrentHome().getName(), objectName);
+		String status = object.getStatus();
+		this.displayController.showObjectStatus(this.getRobotName(), this.getCurrentHome().getName(), objectName, status);
+	}
+	
+	public void makeAction(Object object, Interaction action) {
+		this.displayController.showCommandMakeAction(this.getRobotName(), this.getCurrentHome().getName(), action, object.getName());
 		this.motorController.doAction(action);
-		this.objectDAO.setStatus(object, action.getStatus());
+		this.objectDAO.setStatus(this.getCurrentHome().getName(), object.getName(), action.getStatus());
 	}	
 	
 	public Object getPayload() {
 		return this.payload;
 	}
 
-	public void setPayload(Object payload) {
+	private void setPayload(Object payload) {
 		this.payload = payload;
 	}
-
-	public void addPayload(Object object) {
+	
+	public void addPayload(Object object) throws ObjectDimensionException {
+		this.displayController.showCommandAddPayload(this.getRobotName(), this.getCurrentHome().getName(), object.getName());
+		if (object.getDimension().getWidth() > 1 || object.getDimension().getHeight() > 1) throw new ObjectDimensionException(object.getName());
 		this.setPayload(object);		
 	}
 
 	public void releasePayload() {
 		Object object = this.getPayload();
 		Location location = this.gpsController.getLocation();
-		this.objectDAO.setLocation(object, location);
+		this.objectDAO.setLocation(this.getCurrentHome().getName(), object.getName(), location);
+		this.displayController.showNewObjectLocation(this.getRobotName(), this.getCurrentHome().getName(), object.getName(), object.getLocation(), location);
 		this.setPayload(null);		
 	}	
 	
@@ -201,7 +245,7 @@ public class RobotController {
 				if (ControlDebug.D) Log.printException(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[1].getMethodName(), exc);
 				this.displayController.showBlockingLock(this.getRobotName(), this.getCurrentHome().getName(), exc.getLocation());
 				this.displayController.showCommandComputeSblockingLocation(this.getRobotName(), this.getCurrentHome().getName(), exc.getLocation());
-				Location sblockingLocation = this.getSelectiveClosestLocation(nextLocation, this.gpsController.getLocation());
+				Location sblockingLocation = this.getSelectiveClosestLocation(nextLocation, 3, this.gpsController.getLocation());
 				this.displayController.showSblockingLocation(this.getRobotName(), this.getCurrentHome().getName(), sblockingLocation);
 				MovementPlan sblockingMovementPlan = this.getMovementPlanTo(sblockingLocation);
 				this.move(sblockingMovementPlan);
@@ -278,49 +322,70 @@ public class RobotController {
 		this.lockDAO.deleteLock(this.getRobotName());
 	}	
 
-	private Location getClosestLocation(Location location) {
+	private Location getClosestLocation(Location location, int maxDistance) {
 		if (this.isThereObject(location) || this.isLockedLocation(location)) {
 			List<Direction> randomDirections = RandomController.getRandomDirections();
-			for (Direction direction : randomDirections) {
-				Location closestLocation = Location.computeLocation(location, Direction.FORWARD, direction, 1);
-				if (this.isValidLocation(closestLocation) 
-						&& !this.isThereWall(this.gpsController.getLocation(), closestLocation)
-						&& !this.isThereObject(closestLocation) 
-						&& !this.isLockedLocation(closestLocation)) return closestLocation;
-			}	
+			for (int distance = 1; distance <= maxDistance; distance ++) {
+				for (Direction direction : randomDirections) {				
+					Location closestLocation = Location.computeLocation(location, Direction.FORWARD, direction, distance);
+					if (this.isValidLocation(closestLocation) 
+							&& !this.isThereWall(Location.computeLocation(location, Direction.FORWARD, Direction.getOpposite(direction), 1), closestLocation)
+							&& !this.isThereObject(closestLocation) 
+							&& !this.isLockedLocation(closestLocation)) return closestLocation;
+				}
+			}				
 		}
 		return location;
 	}	
 	
-	private Location getSelectiveClosestLocation(Location location, Location withoutLocation) {
+	private Location getSelectiveClosestLocation(Location location, int maxDistance, Location withoutLocation) {
 		if (this.isThereObject(location) || this.isLockedLocation(location)) {
 			List<Direction> randomDirections = RandomController.getRandomDirections();
-			for (Direction direction : randomDirections) {
-				Location closestLocation = Location.computeLocation(location, Direction.FORWARD, direction, 1);
-				if (closestLocation.equals(withoutLocation)) continue;
-				if (this.isValidLocation(closestLocation) 
-						&& !this.isThereWall(this.gpsController.getLocation(), closestLocation)
-						&& !this.isThereObject(closestLocation) 
-						&& !this.isLockedLocation(closestLocation)) return closestLocation;
-			}	
+			for (int distance = 1; distance <= maxDistance; distance ++) {
+				for (Direction direction : randomDirections) {
+					Location closestLocation = Location.computeLocation(location, Direction.FORWARD, direction, distance);
+					if (closestLocation.equals(withoutLocation)) continue;
+					if (this.isValidLocation(closestLocation) 
+							&& !this.isThereWall(Location.computeLocation(location, Direction.FORWARD, Direction.getOpposite(direction), 1), closestLocation)
+							&& !this.isThereObject(closestLocation) 
+							&& !this.isLockedLocation(closestLocation)) return closestLocation;
+				}
+			}				
 		}
 		return location;
 	}	
 	
-	private Location getSelectiveClosestLocation(Location location, List<Location> withoutLocations) {
+	private Location getSelectiveClosestLocation(Location location, int maxDistance, List<Location> withoutLocations) {
 		if (this.isThereObject(location) || this.isLockedLocation(location)) {
 			List<Direction> randomDirections = RandomController.getRandomDirections();
-			for (Direction direction : randomDirections) {
-				Location closestLocation = Location.computeLocation(location, Direction.FORWARD, direction, 1);
-				if (withoutLocations.contains(closestLocation)) continue;
-				if (this.isValidLocation(closestLocation) 
-						&& !this.isThereWall(this.gpsController.getLocation(), closestLocation)
-						&& !this.isThereObject(closestLocation) 
-						&& !this.isLockedLocation(closestLocation)) return closestLocation;
-			}	
+			for (int distance = 1; distance <= maxDistance; distance ++) {
+				for (Direction direction : randomDirections) {
+					Location closestLocation = Location.computeLocation(location, Direction.FORWARD, direction, distance);
+					if (withoutLocations.contains(closestLocation)) continue;
+					if (this.isValidLocation(closestLocation) 
+							&& !this.isThereWall(Location.computeLocation(location, Direction.FORWARD, Direction.getOpposite(direction), 1), closestLocation)
+							&& !this.isThereObject(closestLocation) 
+							&& !this.isLockedLocation(closestLocation)) return closestLocation;
+				}
+			}				
 		}
 		return location;
 	}	
+	
+	private Location getClosestLocationToObject(Object object) throws ObjectNotFoundException {
+		Location location = object.getMiddleLocation();
+		int maxDistance = Math.max(this.getCurrentHome().getDimension().getWidth(), this.getCurrentHome().getDimension().getHeight());
+		for (int distance = 1; distance < maxDistance; distance ++) {
+			for (Direction direction : Direction.values()) {
+				location = Location.computeLocation(object.getMiddleLocation(), object.getOrientation(), direction, distance);
+				if (this.isValidLocation(location) 
+						&& !this.isThereWall(Location.computeLocation(location, object.getOrientation(), Direction.getOpposite(direction), 1), location)
+						&& !this.isThereObject(location) 
+						&& !this.isLockedLocation(location)) return location;
+			}
+		}
+		return location;
+	}
 
 	private boolean isValidLocation(Location location) {
 		return this.getCurrentHome().comprehend(location);
@@ -349,5 +414,15 @@ public class RobotController {
 	private void showStatus() {
 		this.displayController.showStatus(this.getRobotName(), this.getCurrentHome(), this.gpsController.getLocation());
 	}
+
+	public void showException(NotFoundException exc) {
+		this.displayController.showError(exc.getMessage());
+	}
+
+	public void showException(ObjectDimensionException exc) {
+		this.displayController.showError(exc.getMessage());
+	}
+
+	
 
 }

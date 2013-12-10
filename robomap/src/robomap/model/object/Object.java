@@ -140,6 +140,29 @@ public class Object implements Serializable {
 			}
 		}
 		return false;
-	}	
+	}
+
+	public List<Location> getCoveredLocations() {
+		List<Location> coveredLocations = new ArrayList<Location>();
+		int objX = this.getLocation().getX();
+		int objY = this.getLocation().getY();
+		int objWidth = this.getDimension().getWidth();
+		int objHeight = this.getDimension().getHeight();
+		for (int x = objX; x < objX + objWidth; x ++) {
+			for (int y = objY; y < objY + objHeight; y ++) {
+				Location location = new Location(x, y);
+				coveredLocations.add(location);
+			}
+		}
+		return coveredLocations;
+	}
+	
+	public Location getObjectEdge(Direction direction) {
+		Location location = this.getMiddleLocation();
+		while(this.comprehend(location)) {
+			location = Location.computeLocation(location, this.getOrientation(), direction, 1);
+		}
+		return location;
+	}
 
 }

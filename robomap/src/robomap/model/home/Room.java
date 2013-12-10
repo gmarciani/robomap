@@ -63,8 +63,8 @@ public class Room implements Serializable {
 	}
 	
 	public Location getMiddleLocation() {
-		int middleX = (this.getLocation().getX() + this.getDimension().getWidth()) / 2;
-		int middleY = (this.getLocation().getY() + this.getDimension().getHeight()) / 2; 
+		int middleX = this.getLocation().getX() + (this.getDimension().getWidth() / 2);
+		int middleY = this.getLocation().getY() + (this.getDimension().getHeight() / 2); 
 		return new Location(middleX, middleY);
 	}
 

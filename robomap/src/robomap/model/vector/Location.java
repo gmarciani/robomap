@@ -55,11 +55,11 @@ public class Location extends Vector implements Serializable {
 		return new Location(currX + moveX, currY + moveY);
 	}
 
-	public static Location computeLocation(Location location, Direction orientation, Direction direction, int offset) {
+	public static Location computeLocation(Location location, Direction orientation, Direction direction, int distance) {
 		if (direction == Direction.NONE) return location;
 		Vector rotatedVersor = Vector.rotate(orientation.getVersor(), direction.getRotation());
-		int x = location.getX() + (offset * rotatedVersor.getX());
-		int y = location.getY() + (offset * rotatedVersor.getY());
+		int x = location.getX() + (distance * rotatedVersor.getX());
+		int y = location.getY() + (distance * rotatedVersor.getY());
 		return new Location(x, y);
 	}
 

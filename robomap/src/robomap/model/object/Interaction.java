@@ -17,7 +17,10 @@ import java.io.Serializable;
 public enum Interaction implements Serializable {
 	
 	SWITCH_ON("SWITCH_ON", "ON"),
-	SWITCH_OFF("SWITCH_OFF", "OFF");
+	SWITCH_OFF("SWITCH_OFF", "OFF"),
+	OPEN("OPEN", "OPEN"),
+	CLOSE("CLOSE", "CLOSED"),
+	CLEAN("CLEAN", "CLEAN");
 	
 	private final String name;
 	private final String status;
